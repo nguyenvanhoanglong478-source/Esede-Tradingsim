@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pixel Trader Pro</title>
+    <title>Pixel CS:GO Gacha</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #000000;
-            --bg-panel: #1a1a1a;
+            --bg-panel: #111111;
             --primary: #ffffff;
-            --green: #39ff14; /* Neon Green */
-            --red: #ff003c;   /* Arcade Red */
-            --yellow: #fde910;
-            --blue: #00e5ff;
             --border-size: 3px;
+            
+            /* Tông màu độ hiếm CS:GO chuẩn Pixel */
+            --blue: #0055ff;   /* Mil-Spec */
+            --purple: #8800ff; /* Restricted */
+            --pink: #ff00ff;   /* Classified */
+            --red: #ff0000;    /* Covert */
+            --gold: #ffaa00;   /* Exceedingly Rare */
+            --market-up: #39ff14; /* Neon Green */
+            --market-down: #ff003c; /* Neon Red */
         }
 
         * { 
@@ -27,328 +32,292 @@
         body {
             background-color: var(--bg-dark); color: var(--primary);
             height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow: hidden;
-            /* Hiệu ứng sọc màn hình CRT mờ */
             background-image: linear-gradient(transparent 50%, rgba(255,255,255,0.05) 50%);
             background-size: 100% 4px;
         }
 
-        /* --- BORDERS & SHADOWS KIỂU PIXEL --- */
+        /* --- BỘ KHUNG PIXEL --- */
         .pixel-box {
             background-color: var(--bg-panel);
             border: var(--border-size) solid var(--primary);
             box-shadow: 4px 4px 0px rgba(255,255,255,0.2);
             padding: 10px;
         }
-
+        
         .pixel-btn {
-            background-color: var(--bg-dark);
-            color: var(--primary);
+            background-color: var(--bg-dark); color: var(--primary);
             border: var(--border-size) solid var(--primary);
-            cursor: pointer;
-            text-transform: uppercase;
-            font-size: 10px;
-            padding: 10px;
+            cursor: pointer; text-transform: uppercase;
+            font-size: 10px; padding: 12px;
             box-shadow: 3px 3px 0px var(--primary);
             transition: all 0.1s;
         }
-        .pixel-btn:active {
-            transform: translate(3px, 3px);
-            box-shadow: 0px 0px 0px var(--primary);
-        }
+        .pixel-btn:active { transform: translate(3px, 3px); box-shadow: 0px 0px 0px transparent; }
+        .pixel-btn:disabled { background-color: #333; color: #777; border-color: #555; box-shadow: none; transform: none; cursor: not-allowed; }
 
-        /* --- HUD --- */
-        .hud { display: flex; flex-direction: column; gap: 10px; padding: 10px; }
-        .hud-top { display: flex; justify-content: space-between; align-items: flex-end; }
-        .money { font-size: 14px; color: var(--green); text-shadow: 2px 2px 0px #005500; margin-bottom: 5px; }
-        .passive-income { font-size: 8px; color: var(--yellow); }
-        .level { font-size: 10px; color: var(--blue); }
-        
-        .action-row { display: flex; gap: 10px; margin-top: 5px; }
-        .btn-shop { flex: 1; background-color: var(--yellow); color: black; border-color: black; box-shadow: 3px 3px 0px #888; }
-        
-        /* --- BIỂU ĐỒ --- */
-        .chart-area { flex: 1; position: relative; width: 100%; padding: 10px; }
-        
-        /* --- BẢNG ĐIỀU KHIỂN --- */
-        .trading-panel { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        
-        .trade-input-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .trade-input-wrapper .pixel-btn { padding: 12px; font-size: 14px; }
-        .trade-input {
-            flex: 1; background: black; border: var(--border-size) solid white; color: white;
-            font-size: 16px; text-align: center; padding: 10px; outline: none;
-            font-family: 'Press Start 2P', cursive;
-        }
+        /* --- HEADER & HUD --- */
+        header { display: flex; justify-content: space-between; align-items: flex-end; padding: 10px; border-bottom: 2px dashed #555; }
+        .title { font-size: 12px; color: var(--gold); text-shadow: 2px 2px 0px #885500; line-height: 1.5;}
+        .balance-box { text-align: right; }
+        .balance-val { font-size: 14px; color: var(--market-up); text-shadow: 2px 2px 0px #005500; margin-bottom: 6px;}
+        .inventory-val { font-size: 8px; color: #aaa; }
 
-        .trade-btns { display: flex; gap: 10px; }
-        .btn-up { flex: 1; background-color: var(--green); color: black; border-color: black; box-shadow: 3px 3px 0px #005500; font-size: 12px;}
-        .btn-down { flex: 1; background-color: var(--red); color: white; border-color: white; box-shadow: 3px 3px 0px #550000; font-size: 12px;}
+        /* --- BIỂU ĐỒ THỊ TRƯỜNG --- */
+        .chart-container { height: 28vh; width: 100%; position: relative; padding: 10px; border-bottom: 2px dashed #555; }
+        .market-status { position: absolute; top: 15px; left: 15px; z-index: 10; }
+        .market-title { font-size: 8px; color: #888; margin-bottom: 8px; }
+        .market-multiplier { font-size: 16px; text-shadow: 2px 2px 0px #222; }
+        .market-up { color: var(--market-up); }
+        .market-down { color: var(--market-down); }
 
-        /* --- MODAL SHOP CỬA HÀNG --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 200;
-            padding: 15px;
+        /* --- KHU VỰC GACHA --- */
+        .gacha-panel { padding: 15px 10px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .result-display {
+            min-height: 70px; width: 100%; max-width: 350px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; border: 4px solid #333; background: #000; padding: 10px;
         }
-        .modal-content {
-            width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 15px;
-        }
-        .modal-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--yellow); border-bottom: 2px dashed var(--yellow); padding-bottom: 10px; }
-        .close-btn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; }
+        .result-name { font-size: 10px; line-height: 1.4; margin-bottom: 8px; }
+        .result-price { font-size: 8px; color: #fff; }
+        .btn-open { width: 100%; max-width: 350px; background-color: var(--gold); color: black; border-color: black; box-shadow: 4px 4px 0px #885500; font-size: 14px; font-weight: bold; }
+
+        /* --- KHO ĐỒ --- */
+        .inventory-panel { flex: 1; padding: 10px; overflow-y: auto; }
+        .inv-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 8px; color: #888; }
+        .btn-sell-all { font-size: 8px; padding: 8px; background: var(--market-down); color: white; border-color: white; box-shadow: 2px 2px 0px white;}
         
+        .grid-inventory { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding-bottom: 20px;}
         .item-card {
-            display: flex; justify-content: space-between; align-items: center;
-            border: 2px solid white; padding: 10px; background: #111;
+            background-color: #050505; border: 2px solid white; padding: 8px;
+            display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
+            box-shadow: 3px 3px 0px #222;
         }
-        .item-info { display: flex; flex-direction: column; gap: 6px; width: 65%; }
-        .item-name { font-size: 10px; line-height: 1.4; color: var(--blue); }
-        .item-desc { font-size: 8px; color: var(--green); }
-        .item-owned { font-size: 8px; color: #888; }
-        .btn-buy { width: 30%; font-size: 8px; padding: 8px; background: white; color: black; border-color: black;}
+        .item-name { font-size: 8px; line-height: 1.4; word-wrap: break-word; }
+        .item-price { font-size: 8px; color: white; }
+        .btn-sell-single {
+            width: 100%; padding: 8px; font-size: 8px;
+            background: transparent; color: white; border: 1px dashed white; cursor: pointer;
+        }
+        .btn-sell-single:active { background: white; color: black; }
 
-        /* --- THÔNG BÁO --- */
-        #toast-container { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 5px; width: 90%; pointer-events: none;}
-        .toast { background-color: black; padding: 12px; font-size: 8px; line-height: 1.5; text-align: center; border: 2px solid white; box-shadow: 4px 4px 0px rgba(255,255,255,0.3); animation: slideUp 0.2s; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        /* Cuộn màn hình */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: white; }
     </style>
 </head>
 <body>
 
-    <div class="hud pixel-box">
-        <div class="hud-top">
-            <div>
-                <div class="level" id="level-display">LV: 1</div>
-                <div style="font-size: 8px; color: #888; margin-top: 5px;">STREAK: <span id="streak-display">0</span></div>
-            </div>
-            <div style="text-align: right;">
-                <div class="money" id="balance-display">1000$</div>
-                <div class="passive-income" id="income-display">+0$/giây</div>
-            </div>
+    <header>
+        <div class="title"><i class="fa-solid fa-box-open"></i> GACHA<br><span style="font-size: 8px; color: #888;">CASE: $2.50</span></div>
+        <div class="balance-box">
+            <div class="balance-val" id="balance-display">100.00$</div>
+            <div class="inventory-val">KHO: <span id="inv-value-display">0.00$</span></div>
         </div>
-        <div class="action-row">
-            <button class="pixel-btn btn-shop" onclick="openShop()"><i class="fa-solid fa-cart-shopping"></i> CỬA HÀNG</button>
+    </header>
+
+    <div class="chart-container">
+        <div class="market-status">
+            <div class="market-title">THỊ TRƯỜNG CHUNG</div>
+            <div class="market-multiplier market-up" id="market-display">x1.000</div>
         </div>
+        <canvas id="marketChart"></canvas>
     </div>
 
-    <div class="chart-area pixel-box" style="border-top: none; border-bottom: none; box-shadow: none;">
-        <canvas id="gameChart"></canvas>
+    <div class="gacha-panel">
+        <div class="result-display" id="result-box">
+            <div style="color: #555; font-size: 8px;">[ CHƯA MỞ RƯƠNG ]</div>
+        </div>
+        <button class="pixel-btn btn-open" id="btn-open" onclick="openCase()">MỞ NGAY ($2.50)</button>
     </div>
 
-    <div class="trading-panel pixel-box">
-        <div id="toast-container"></div>
-        
-        <div style="font-size: 10px; text-align: center; color: var(--yellow);">MÃ: PIXEL-COIN (80%)</div>
-        
-        <div class="trade-input-wrapper">
-            <button class="pixel-btn" onclick="adjustAmount(-50)">-</button>
-            <input type="number" class="trade-input" id="trade-amount" value="100" min="10">
-            <button class="pixel-btn" onclick="adjustAmount(50)">+</button>
+    <div class="inventory-panel">
+        <div class="inv-header">
+            <span>SỐ LƯỢNG: <span id="inv-count">0</span></span>
+            <button class="pixel-btn btn-sell-all" onclick="sellAll()">BÁN HẾT</button>
         </div>
-        
-        <div class="trade-btns">
-            <button class="pixel-btn btn-up" onclick="executeTrade('UP')">TĂNG</button>
-            <button class="pixel-btn btn-down" onclick="executeTrade('DOWN')">GIẢM</button>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="shop-modal">
-        <div class="modal-content pixel-box">
-            <div class="modal-header">
-                <span>SHOP TÀI SẢN</span>
-                <button class="close-btn" onclick="closeShop()">X</button>
+        <div class="grid-inventory" id="inventory-grid">
             </div>
-            <div id="shop-list" style="display: flex; flex-direction: column; gap: 10px;">
-                </div>
-        </div>
     </div>
 
 <script>
-    // --- 1. DỮ LIỆU & LOCAL STORAGE ---
-    const defaultData = { 
-        balance: 1000, level: 1, xp: 0, xpNeeded: 100, streak: 0, baseRate: 0.80,
-        assets: { miner: 0, pickaxe: 0, server: 0 } // Số lượng tài sản sở hữu
-    };
-    
-    let gameData = JSON.parse(localStorage.getItem('pixel_trading_data')) || defaultData;
-    // Cập nhật cấu trúc nếu người chơi cũ chưa có object assets
-    if(!gameData.assets) gameData.assets = { miner: 0, pickaxe: 0, server: 0 };
-    gameData.streak = 0; 
+    // --- 1. DỮ LIỆU CỐT LÕI ---
+    const CASE_PRICE = 2.50;
+    let balance = 100.00;
+    let inventory = [];
+    let marketMultiplier = 1.000; 
 
-    // Cửa hàng vật phẩm
-    const shopItems = {
-        miner: { id: 'miner', name: 'Máy Đào Coin Cùi', cost: 500, income: 5, icon: 'fa-microchip' },
-        pickaxe: { id: 'pickaxe', name: 'Cúp Kim Cương', cost: 2500, income: 30, icon: 'fa-hammer' },
-        server: { id: 'server', name: 'Trang Trại Server', cost: 10000, income: 150, icon: 'fa-server' }
-    };
+    // Hệ thống Loot Pool chuẩn CS:GO với màu sắc Pixel
+    const lootPool = [
+        { name: "P250 Sand Dune", color: "var(--blue)", basePrice: 0.10, weight: 79.92 },
+        { name: "M4A1-S Cyrex", color: "var(--purple)", basePrice: 1.50, weight: 15.98 },
+        { name: "AK-47 Asiimov", color: "var(--pink)", basePrice: 8.50, weight: 3.20 },
+        { name: "AWP Dragon Lore", color: "var(--red)", basePrice: 65.00, weight: 0.64 },
+        { name: "★ Butterfly Knife", color: "var(--gold)", basePrice: 350.00, weight: 0.26 }
+    ];
 
-    let currentPrice = 100.00;
-    const tradeDuration = 5; // 5 giây
-
-    // --- 2. CẬP NHẬT GIAO DIỆN CHUNG ---
-    function saveData() { localStorage.setItem('pixel_trading_data', JSON.stringify(gameData)); }
-
-    function getTotalIncome() {
-        let total = 0;
-        for (let key in shopItems) {
-            total += gameData.assets[key] * shopItems[key].income;
-        }
-        return total;
-    }
-
-    function updateHUD() {
-        document.getElementById('balance-display').innerText = Math.floor(gameData.balance) + '$';
-        document.getElementById('level-display').innerText = `LV: ${gameData.level}`;
-        document.getElementById('streak-display').innerText = gameData.streak;
-        document.getElementById('income-display').innerText = `+${getTotalIncome()}$/giây`;
-    }
-
-    function showToast(msg, color = 'white') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast'; toast.style.color = color; toast.style.borderColor = color;
-        toast.innerText = msg;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 2500);
-    }
-
-    function adjustAmount(val) {
-        let input = document.getElementById('trade-amount');
-        let newVal = (parseInt(input.value) || 0) + val;
-        input.value = Math.max(newVal, 10);
-    }
-
-    // --- 3. LOGIC CỬA HÀNG TÀI SẢN ---
-    function openShop() {
-        renderShop();
-        document.getElementById('shop-modal').style.display = 'flex';
-    }
-    function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
-
-    function renderShop() {
-        const container = document.getElementById('shop-list');
-        container.innerHTML = '';
-        for (let key in shopItems) {
-            let item = shopItems[key];
-            let owned = gameData.assets[key];
-            container.innerHTML += `
-                <div class="item-card">
-                    <div class="item-info">
-                        <div class="item-name"><i class="fa-solid ${item.icon}"></i> ${item.name}</div>
-                        <div class="item-desc">+${item.income}$/giây</div>
-                        <div class="item-owned">Đã có: ${owned}</div>
-                    </div>
-                    <button class="pixel-btn btn-buy" onclick="buyItem('${key}')">${item.cost}$</button>
-                </div>
-            `;
-        }
-    }
-
-    function buyItem(key) {
-        let item = shopItems[key];
-        if (gameData.balance >= item.cost) {
-            gameData.balance -= item.cost;
-            gameData.assets[key]++;
-            saveData();
-            updateHUD();
-            renderShop(); // Cập nhật lại số lượng trong shop
-            showToast(`Đã mua ${item.name}!`, 'var(--green)');
-        } else {
-            showToast(`Thiếu tiền! Cần ${item.cost}$`, 'var(--red)');
-        }
-    }
-
-    // VÒNG LẶP THU NHẬP THỤ ĐỘNG (Chạy mỗi 1 giây)
-    setInterval(() => {
-        let income = getTotalIncome();
-        if (income > 0) {
-            gameData.balance += income;
-            updateHUD();
-            saveData();
-        }
-    }, 1000);
-
-    // --- 4. BIỂU ĐỒ PIXEL ---
-    const ctx = document.getElementById('gameChart').getContext('2d');
-    let priceData = Array(25).fill(currentPrice);
-    
-    // Cấu hình phông chữ Pixel cho trục Chart.js
+    // --- 2. CẤU HÌNH BIỂU ĐỒ PIXEL ---
     Chart.defaults.font.family = "'Press Start 2P', cursive";
-    Chart.defaults.color = "#ffffff";
+    Chart.defaults.color = "#aaaaaa";
+    
+    const ctx = document.getElementById('marketChart').getContext('2d');
+    const maxDataPoints = 25;
+    let marketData = Array(maxDataPoints).fill(marketMultiplier);
 
     const chart = new Chart(ctx, {
         type: 'line',
-        data: { 
-            labels: Array(25).fill(''), 
-            datasets: [{ 
-                data: priceData, 
-                borderColor: '#39ff14', 
-                borderWidth: 3, 
-                stepped: true, // Chuyển đường cong thành bậc thang 8-bit
-                pointRadius: 0 
-            }] 
+        data: {
+            labels: Array(maxDataPoints).fill(''),
+            datasets: [{
+                data: marketData,
+                borderColor: '#39ff14',
+                borderWidth: 2,
+                stepped: true, // Nét đứt bậc thang chuẩn Pixel
+                pointRadius: 0
+            }]
         },
-        options: { 
-            responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, 
-            scales: { 
-                x: { display: false }, 
-                y: { 
-                    position: 'right', 
-                    grid: { color: '#333' }, 
-                    ticks: { font: { size: 8 } } 
-                } 
-            }, 
-            plugins: { legend: { display: false }, tooltip: { enabled: false } } 
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
+            layout: { padding: { top: 40 } },
+            scales: { x: { display: false }, y: { position: 'right', grid: { color: '#222' }, ticks: { font: { size: 7 } } } },
+            plugins: { legend: { display: false }, tooltip: { enabled: false } }
         }
     });
 
+    // --- 3. ĐỘNG CƠ THỊ TRƯỜNG ---
     setInterval(() => {
-        currentPrice += (Math.random() * 6 - 3);
-        priceData.push(currentPrice); priceData.shift();
-        chart.data.datasets[0].borderColor = priceData[24] >= priceData[23] ? '#39ff14' : '#ff003c';
+        const volatility = (Math.random() * 8 - 4) / 100;
+        marketMultiplier *= (1 + volatility);
+        if (marketMultiplier < 0.1) marketMultiplier = 0.1;
+
+        marketData.push(marketMultiplier);
+        marketData.shift();
+
+        const isUp = marketData[maxDataPoints - 1] >= marketData[maxDataPoints - 2];
+        chart.data.datasets[0].borderColor = isUp ? '#39ff14' : '#ff003c';
         chart.update();
-    }, 1000);
 
-    // --- 5. LOGIC KHỚP LỆNH ---
-    function executeTrade(direction) {
-        const amount = parseInt(document.getElementById('trade-amount').value);
-        if (amount > gameData.balance) { showToast("KHÔNG ĐỦ TIỀN!", "var(--red)"); return; }
+        const elMarket = document.getElementById('market-display');
+        elMarket.innerText = 'x' + marketMultiplier.toFixed(3);
+        elMarket.className = `market-multiplier ${isUp ? 'market-up' : 'market-down'}`;
 
-        gameData.balance -= amount;
-        updateHUD(); saveData();
-        const entryPrice = currentPrice;
-        showToast("ĐANG KHỚP LỆNH...", "var(--blue)");
+        // Cập nhật giá kho đồ mà không cần render lại toàn bộ HTML
+        updateInventoryPrices();
+    }, 1500);
 
-        setTimeout(() => {
-            const exitPrice = currentPrice;
-            let isWin = (direction === 'UP' && exitPrice > entryPrice) || (direction === 'DOWN' && exitPrice < entryPrice);
-
-            if (isWin) {
-                const profit = amount + (amount * gameData.baseRate);
-                gameData.balance += profit;
-                gameData.streak++;
-                
-                // Logic tăng cấp đơn giản
-                gameData.xp += 40;
-                if(gameData.xp >= gameData.xpNeeded) {
-                    gameData.level++; gameData.xp = 0; gameData.xpNeeded *= 1.5;
-                    showToast(`LEVEL UP! LV.${gameData.level}`, 'var(--yellow)');
-                }
-                
-                showToast(`WIN! +${Math.floor(profit)}$`, "var(--green)");
-            } else if (exitPrice === entryPrice) {
-                gameData.balance += amount; 
-                showToast("HÒA!", "white");
-            } else {
-                gameData.streak = 0; 
-                showToast(`LOSE! -${amount}$`, "var(--red)");
-            }
-            
-            saveData(); updateHUD();
-        }, tradeDuration * 1000);
+    // --- 4. GACHA LOGIC ---
+    function rollGacha() {
+        let rand = Math.random() * 100;
+        let cumulativeWeight = 0;
+        for (let i = 0; i < lootPool.length; i++) {
+            cumulativeWeight += lootPool[i].weight;
+            if (rand <= cumulativeWeight) return lootPool[i];
+        }
+        return lootPool[0];
     }
 
-    updateHUD();
+    function openCase() {
+        if (balance < CASE_PRICE) {
+            alert("HẾT TIỀN!"); return;
+        }
+
+        balance -= CASE_PRICE;
+        updateBalanceUI();
+        
+        const btn = document.getElementById('btn-open');
+        const resultBox = document.getElementById('result-box');
+        
+        btn.disabled = true;
+        btn.innerText = "MỞ...";
+        resultBox.style.borderColor = "#333";
+        resultBox.innerHTML = `<div style="color: #fff; font-size: 8px;">ĐANG QUAY...</div>`;
+
+        setTimeout(() => {
+            const pulled = rollGacha();
+            const item = {
+                id: Date.now() + Math.floor(Math.random()*1000), // ID duy nhất
+                name: pulled.name, color: pulled.color, basePrice: pulled.basePrice
+            };
+            
+            inventory.unshift(item); // Thêm lên đầu mảng
+            
+            const currentVal = item.basePrice * marketMultiplier;
+            resultBox.style.borderColor = item.color;
+            resultBox.innerHTML = `
+                <div class="result-name" style="color: ${item.color}">${item.name}</div>
+                <div class="result-price">GIÁ TT: ${currentVal.toFixed(2)}$</div>
+            `;
+
+            renderFullInventory(); // Có đồ mới nên phải vẽ lại 1 lần
+            btn.disabled = false;
+            btn.innerText = "MỞ NGAY ($2.50)";
+        }, 400);
+    }
+
+    // --- 5. KHO ĐỒ & UI ---
+    function updateBalanceUI() {
+        document.getElementById('balance-display').innerText = balance.toFixed(2) + '$';
+    }
+
+    // Hàm vẽ lại HTML toàn bộ kho (Chỉ gọi khi Mở hòm hoặc Bán)
+    function renderFullInventory() {
+        const grid = document.getElementById('inventory-grid');
+        grid.innerHTML = '';
+        document.getElementById('inv-count').innerText = inventory.length;
+
+        let totalValue = 0;
+        inventory.forEach(item => {
+            const currentVal = item.basePrice * marketMultiplier;
+            totalValue += currentVal;
+            
+            grid.innerHTML += `
+                <div class="item-card" id="card-${item.id}" style="border-top: 4px solid ${item.color};">
+                    <div class="item-name" style="color: ${item.color}">${item.name}</div>
+                    <div>
+                        <div class="item-price" id="price-${item.id}">${currentVal.toFixed(2)}$</div>
+                        <button class="btn-sell-single" style="margin-top: 8px;" onclick="sellItem(${item.id})">BÁN NGAY</button>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('inv-value-display').innerText = totalValue.toFixed(2) + '$';
+    }
+
+    // Hàm cập nhật NHẸ chỉ số tiền (Gọi mỗi 1.5s để chống giật màn hình)
+    function updateInventoryPrices() {
+        let totalValue = 0;
+        inventory.forEach(item => {
+            const currentVal = item.basePrice * marketMultiplier;
+            totalValue += currentVal;
+            
+            // Chỉ đổi chữ số trong thẻ span, không đụng tới HTML khác
+            const priceEl = document.getElementById(`price-${item.id}`);
+            if(priceEl) priceEl.innerText = currentVal.toFixed(2) + '$';
+        });
+        document.getElementById('inv-value-display').innerText = totalValue.toFixed(2) + '$';
+    }
+
+    function sellItem(id) {
+        const index = inventory.findIndex(i => i.id === id);
+        if (index > -1) {
+            const item = inventory[index];
+            balance += (item.basePrice * marketMultiplier);
+            inventory.splice(index, 1);
+            updateBalanceUI();
+            renderFullInventory();
+        }
+    }
+
+    function sellAll() {
+        if (inventory.length === 0) return;
+        let total = 0;
+        inventory.forEach(item => total += (item.basePrice * marketMultiplier));
+        balance += total;
+        inventory = [];
+        updateBalanceUI();
+        renderFullInventory();
+    }
+
+    updateBalanceUI();
 </script>
 </body>
 </html>
