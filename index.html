@@ -3,437 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sàn Giao Dịch Mô Phỏng Pro</title>
+    <title>Sàn Giao Dịch Crypto Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- THIẾT KẾ GIAO DIỆN CHUẨN MÁY TÍNH (DESKTOP) --- */
-        * {
-            box-sizing: border-box;
+        /* --- ROOT & RESET --- */
+        :root {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --up-color: #10b981;
+            --down-color: #ef4444;
+            --border: #334155;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- BỐ CỤC CHÍNH --- */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- HEADER & TỔNG TÀI SẢN --- */
+        .header-panel {
+            background-color: var(--bg-card);
+            border-radius: 16px;
             padding: 20px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            min-height: 100vh;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        .dashboard {
+        .net-worth-box h1 { font-size: 28px; color: var(--up-color); margin-top: 5px; }
+        .net-worth-box p { color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
+        .cash-box { text-align: right; }
+        .cash-box h2 { font-size: 20px; color: var(--text-main); margin-top: 5px; }
+
+        /* --- HỆ THỐNG TABS --- */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background-color: var(--bg-card);
+            padding: 10px;
+            border-radius: 12px;
+            overflow-x: auto;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn:hover { background-color: var(--bg-hover); color: var(--text-main); }
+        .tab-btn.active { background-color: var(--accent); color: white; box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3); }
+
+        /* --- KHU VỰC GIAO DỊCH (CHART + PANEL) --- */
+        .main-dashboard {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 20px;
-            max-width: 1200px;
-            width: 100%;
         }
         .card {
-            background-color: #1e1e1e;
+            background-color: var(--bg-card);
+            border-radius: 16px;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Thông tin Coin Đang chọn */
+        .active-coin-header {
             display: flex;
-            flex-direction: column;
             justify-content: space-between;
-        }
-        h2, h3 {
-            margin-top: 0;
-            color: #ffffff;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-        }
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            align-items: baseline;
             margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
         }
-        .stat-box {
-            background-color: #2c2c2c;
+        .active-coin-header h2 { font-size: 24px; }
+        .active-coin-header .price { font-size: 28px; font-weight: bold; }
+        .price.up { color: var(--up-color); }
+        .price.down { color: var(--down-color); }
+
+        /* Biểu đồ */
+        .chart-container { width: 100%; height: 300px; position: relative; }
+
+        /* Bảng đặt lệnh */
+        .trade-form label { display: block; color: var(--text-muted); margin-bottom: 8px; font-size: 14px; }
+        .trade-form input {
+            width: 100%;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            color: var(--text-main);
             padding: 15px;
             border-radius: 8px;
-            text-align: center;
-        }
-        .stat-title {
-            font-size: 13px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .stat-value {
-            font-size: 22px;
-            font-weight: bold;
-            margin-top: 5px;
-            color: #4caf50;
-            transition: color 0.3s;
-        }
-        .stat-value.down { color: #f44336; }
-        .stat-value.neutral { color: #2196f3; }
-        
-        .chart-container {
-            position: relative;
-            width: 100%;
-            height: auto;
-        }
-        canvas {
-            background-color: #161616;
-            border-radius: 8px;
-            padding: 10px;
-            width: 100% !important;
-        }
-
-        .trade-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-        label {
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #aaa;
-        }
-        input {
-            padding: 12px;
-            border: 1px solid #444;
-            background-color: #121212;
-            color: white;
-            border-radius: 6px;
             font-size: 16px;
+            margin-bottom: 15px;
             outline: none;
+            transition: border-color 0.2s;
         }
-        input:focus {
-            border-color: #2196f3;
-        }
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-        button {
+        .trade-form input:focus { border-color: var(--accent); }
+        
+        .btn-group { display: flex; gap: 10px; }
+        .btn {
             flex: 1;
             padding: 15px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             color: white;
-            transition: transform 0.1s, filter 0.2s;
+            transition: transform 0.1s, opacity 0.2s;
         }
-        button:active { transform: scale(0.98); }
-        button:hover { filter: brightness(1.1); }
-        .btn-buy { background-color: #4caf50; }
-        .btn-sell { background-color: #f44336; }
+        .btn:active { transform: scale(0.96); }
+        .btn:hover { opacity: 0.9; }
+        .btn-buy { background-color: var(--up-color); }
+        .btn-sell { background-color: var(--down-color); }
 
-        .history-list {
-            max-height: 220px;
-            overflow-y: auto;
-            margin-top: 10px;
-            font-size: 13px;
-        }
-        /* Tùy chỉnh thanh cuộn lịch sử */
-        .history-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        .history-list::-webkit-scrollbar-thumb {
-            background: #333;
-            border-radius: 3px;
-        }
-        .history-item {
+        .coin-balance {
+            background-color: var(--bg-main);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #2a2a2a;
-        }
-        .history-item.buy { color: #4caf50; }
-        .history-item.sell { color: #f44336; }
-        
-        #notification {
-            font-size: 14px;
-            text-align: center;
-            min-height: 20px;
-            font-weight: 500;
+            border: 1px solid var(--border);
         }
 
-        /* --- THIẾT KẾ WEB ĐÁP ỨNG CHO ĐIỆN THOẠI (RESPONSIVE) --- */
-        @media screen and (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            .dashboard {
-                /* Đổi cấu trúc từ 2 cột nằm ngang sang 1 cột dọc xếp chồng */
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            .stat-grid {
-                /* Xếp các ô thông số thành cột dọc để không bị tràn chữ */
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            .stat-box {
-                padding: 10px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .stat-value {
-                margin-top: 0;
-                font-size: 18px;
-            }
-            .card {
-                padding: 15px;
-            }
-            .btn-group {
-                /* Nút Mua và Bán xếp dọc để ngón tay dễ bấm chính xác */
-                flex-direction: column;
-                gap: 10px;
-            }
-            button {
-                padding: 12px;
-            }
+        #notification { text-align: center; margin-top: 15px; font-size: 14px; min-height: 20px; }
+
+        /* --- RESPONSIVE CHO ĐIỆN THOẠI --- */
+        @media (max-width: 768px) {
+            .header-panel { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .cash-box { text-align: left; }
+            .main-dashboard { grid-template-columns: 1fr; }
+            .chart-container { height: 220px; }
         }
     </style>
 </head>
 <body>
 
-<div class="dashboard">
-    <div class="card">
-        <h2>Tổng quan Thị trường (Mã: V-COIN)</h2>
-        
-        <div class="stat-grid">
-            <div class="stat-box">
-                <div class="stat-title">Giá Hiện Tại</div>
-                <div class="stat-value" id="current-price">$100.00</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-title">Tổng Tài Sản</div>
-                <div class="stat-value neutral" id="net-worth">$1,000.00</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-title">Lợi Nhuận (P&L)</div>
-                <div class="stat-value neutral" id="profit-loss">$0.00</div>
-            </div>
+<div class="container">
+    <div class="header-panel">
+        <div class="net-worth-box">
+            <p>Tổng Tài Sản (Net Worth)</p>
+            <h1 id="total-net-worth">$10,000.00</h1>
         </div>
-
-        <div class="chart-container">
-            <canvas id="priceChart" height="180"></canvas>
+        <div class="cash-box">
+            <p>Tiền Mặt (Khả dụng)</p>
+            <h2 id="cash-balance">$10,000.00</h2>
         </div>
     </div>
 
-    <div class="card">
-        <h3>Bảng Đặt Lệnh</h3>
-        
-        <div class="stat-box" style="margin-bottom: 15px; display: block; text-align: left;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span class="stat-title">Tiền mặt (USD):</span>
-                <strong id="balance" style="color: white; font-size: 16px;">$1,000.00</strong>
+    <div class="tabs" id="coin-tabs">
+        </div>
+
+    <div class="main-dashboard">
+        <div class="card">
+            <div class="active-coin-header">
+                <div>
+                    <h2 id="active-coin-name">Bitcoin (BTC)</h2>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Cập nhật theo thời gian thực</p>
+                </div>
+                <div class="price up" id="active-coin-price">$0.00</div>
             </div>
-            <div style="display: flex; justify-content: space-between;">
-                <span class="stat-title">Đang sở hữu:</span>
-                <strong id="assets" style="color: white; font-size: 16px;">0.00 V-COIN</strong>
+            <div class="chart-container">
+                <canvas id="mainChart"></canvas>
             </div>
         </div>
 
-        <div class="trade-panel">
-            <div class="input-group">
-                <label for="quantity">Số lượng muốn giao dịch:</label>
-                <input type="number" id="quantity" value="1" min="0.01" step="0.01">
-            </div>
+        <div class="card">
+            <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Đặt Lệnh Nhanh</h3>
             
-            <div class="btn-group">
-                <button class="btn-buy" onclick="executeTrade('BUY')">MUA VÀO</button>
-                <button class="btn-sell" onclick="executeTrade('SELL')">BÁN RA</button>
+            <div class="coin-balance">
+                <span style="color: var(--text-muted);">Sở hữu:</span>
+                <strong id="active-coin-balance">0.00</strong>
+            </div>
+
+            <div class="trade-form">
+                <label for="trade-amount">Số lượng muốn giao dịch:</label>
+                <input type="number" id="trade-amount" value="1" min="0.001" step="0.01">
+                
+                <div class="btn-group">
+                    <button class="btn btn-buy" onclick="executeTrade('BUY')">MUA VÀO</button>
+                    <button class="btn btn-sell" onclick="executeTrade('SELL')">BÁN RA</button>
+                </div>
             </div>
             <div id="notification"></div>
         </div>
-
-        <h3 style="margin-top: 25px;">Lịch sử Giao dịch</h3>
-        <div class="history-list" id="history-log">
-            </div>
     </div>
 </div>
 
 <script>
-    // --- KHỞI TẠO BIẾN TRẠNG THÁI HỆ THỐNG ---
-    let balance = 1000.00;
-    let assetsOwned = 0.00;
-    let currentPrice = 100.00;
-    const initialBalance = 1000.00;
+    // --- QUẢN LÝ DỮ LIỆU CỐT LÕI ---
+    let portfolio = {
+        cash: 10000.00, // Vốn khởi điểm lớn hơn để dễ mua BTC
+    };
 
-    // Quản lý mảng dữ liệu phục vụ vẽ đồ thị
-    let timeLabels = [];
-    let priceData = [];
-    const maxDataPoints = 20; // Giới hạn số điểm hiển thị trên màn hình
+    // Cơ sở dữ liệu danh sách các loại tiền điện tử
+    const coins = {
+        'BTC': { name: 'Bitcoin', symbol: 'BTC', price: 65000, balance: 0, history: [], color: '#f59e0b', icon: 'fa-bitcoin' },
+        'ETH': { name: 'Ethereum', symbol: 'ETH', price: 3500, balance: 0, history: [], color: '#627eea', icon: 'fa-brands fa-ethereum' },
+        'SOL': { name: 'Solana', symbol: 'SOL', price: 150, balance: 0, history: [], color: '#14f195', icon: 'fa-solid fa-link' },
+        'DOGE': { name: 'Dogecoin', symbol: 'DOGE', price: 0.15, balance: 0, history: [], color: '#eab308', icon: 'fa-solid fa-dog' }
+    };
 
-    // Khai báo các con trỏ trỏ tới phần tử DOM HTML
-    const elPrice = document.getElementById('current-price');
-    const elBalance = document.getElementById('balance');
-    const elAssets = document.getElementById('assets');
-    const elNetWorth = document.getElementById('net-worth');
-    const elProfitLoss = document.getElementById('profit-loss');
+    let activeCoinKey = 'BTC'; // Coin đang được chọn để hiển thị
+    const maxHistoryPoints = 25; // Số điểm trên biểu đồ
+    const timeLabels = Array(maxHistoryPoints).fill(''); 
+
+    // --- CÁC PHẦN TỬ GIAO DIỆN ---
+    const elTotalNetWorth = document.getElementById('total-net-worth');
+    const elCashBalance = document.getElementById('cash-balance');
+    const elTabsContainer = document.getElementById('coin-tabs');
+    const elActiveName = document.getElementById('active-coin-name');
+    const elActivePrice = document.getElementById('active-coin-price');
+    const elActiveBalance = document.getElementById('active-coin-balance');
+    const inputAmount = document.getElementById('trade-amount');
     const elNotif = document.getElementById('notification');
-    const elHistory = document.getElementById('history-log');
-    const inputQty = document.getElementById('quantity');
 
-    // --- CẤU HÌNH BIỂU ĐỒ REAL-TIME (Sử dụng cấu trúc đối tượng Chart.js) ---
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    const priceChart = new Chart(ctx, {
+    // --- KHỞI TẠO BIỂU ĐỒ (CHART.JS) ---
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    let chartInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: timeLabels,
             datasets: [{
-                label: 'Giá V-COIN ($)',
-                data: priceData,
-                borderColor: '#4caf50',
-                backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                data: [],
+                borderColor: '#3b82f6',
                 borderWidth: 2,
-                fill: true,
-                tension: 0.2,
+                tension: 0.3,
                 pointRadius: 0
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: { duration: 0 }, // Tắt hiệu ứng mượt để tối ưu hiệu năng cập nhật liên tục
+            animation: { duration: 0 },
             scales: {
                 x: { display: false },
-                y: { grid: { color: '#252525' }, ticks: { color: '#888' } }
+                y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
             },
-            plugins: { legend: { display: false } }
+            plugins: { legend: { display: false }, tooltip: { enabled: true } }
         }
     });
 
-    // --- HÀM TRỢ GIÚP LOGIC ---
-    function formatMoney(num) {
-        return '$' + parseFloat(num).toFixed(2);
+    // --- HÀM TRỢ GIÚP ---
+    function formatMoney(amount) {
+        // Tự động định dạng số thập phân tuỳ vào giá trị (VD: DOGE cần nhiều số lẻ hơn BTC)
+        let decimals = amount < 1 ? 4 : 2;
+        return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
     }
 
-    function getCurrentTime() {
-        const now = new Date();
-        const hrs = String(now.getHours()).padStart(2, '0');
-        const mins = String(now.getMinutes()).padStart(2, '0');
-        const secs = String(now.getSeconds()).padStart(2, '0');
-        return `${hrs}:${mins}:${secs}`;
-    }
-
-    function showNotif(msg, color) {
+    function showNotification(msg, isSuccess) {
         elNotif.innerText = msg;
-        elNotif.style.color = color;
+        elNotif.style.color = isSuccess ? 'var(--up-color)' : 'var(--down-color)';
+        setTimeout(() => elNotif.innerText = '', 3000);
     }
 
-    // Thêm một hàng ghi nhận nhật ký giao dịch mới lên đầu danh sách
-    function addHistoryRow(type, qty, price) {
-        const row = document.createElement('div');
-        row.className = `history-item ${type.toLowerCase()}`;
-        
-        const timeStr = getCurrentTime();
-        const actionStr = type === 'BUY' ? 'Mua' : 'Bán';
-        const totalStr = formatMoney(qty * price);
-
-        row.innerHTML = `
-            <span>[${timeStr}] ${actionStr} ${qty.toFixed(2)} V-COIN</span>
-            <span>@ ${formatMoney(price)} = ${totalStr}</span>
-        `;
-        elHistory.prepend(row);
+    // --- KHỞI TẠO TABS ---
+    function renderTabs() {
+        elTabsContainer.innerHTML = '';
+        Object.keys(coins).forEach(key => {
+            const coin = coins[key];
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${key === activeCoinKey ? 'active' : ''}`;
+            btn.innerHTML = `<i class="${coin.icon}"></i> ${coin.symbol}`;
+            btn.onclick = () => switchTab(key);
+            elTabsContainer.appendChild(btn);
+        });
     }
 
-    // Hàm cập nhật trạng thái dữ liệu lên giao diện người dùng
-    function updateUI(oldPrice) {
-        elBalance.innerText = formatMoney(balance);
-        elAssets.innerText = assetsOwned.toFixed(2) + " V-COIN";
-        elPrice.innerText = formatMoney(currentPrice);
-
-        // Thuật toán tính Tổng tài sản (Net Worth = Tiền mặt + Giá trị Coin quy đổi)
-        const netWorth = balance + (assetsOwned * currentPrice);
-        const profitLoss = netWorth - initialBalance;
-
-        elNetWorth.innerText = formatMoney(netWorth);
-        elProfitLoss.innerText = (profitLoss >= 0 ? '+' : '') + formatMoney(profitLoss);
-
-        // Kiểm tra điều kiện đổi màu sắc hiển thị (Xanh khi tăng / Đỏ khi giảm)
-        if (currentPrice >= oldPrice) {
-            elPrice.className = "stat-value";
-            priceChart.data.datasets[0].borderColor = '#4caf50';
-        } else {
-            elPrice.className = "stat-value down";
-            priceChart.data.datasets[0].borderColor = '#f44336';
-        }
-
-        if (profitLoss >= 0) {
-            elProfitLoss.className = "stat-value";
-        } else {
-            elProfitLoss.className = "stat-value down";
-        }
+    function switchTab(key) {
+        activeCoinKey = key;
+        renderTabs(); // Cập nhật lại màu sắc tab
+        updateUI();   // Vẽ lại giao diện theo coin mới
     }
 
-    // --- ĐỘNG CƠ MÔ PHỎNG BIẾN ĐỘNG THỊ TRƯỜNG (Chạy lặp lại sau mỗi 1.5 giây) ---
+    // --- VÒNG LẶP THỊ TRƯỜNG TỔNG (CHẠY NGẦM CHO TẤT CẢ COIN) ---
+    // Khởi tạo lịch sử giá ban đầu cho đỡ trống
+    Object.keys(coins).forEach(key => {
+        for(let i=0; i<maxHistoryPoints; i++) coins[key].history.push(coins[key].price);
+    });
+
     setInterval(() => {
-        const oldPrice = currentPrice;
-        
-        // Tạo biến động ngẫu nhiên có biên độ từ -3.0% đến +3.5%
-        const volatility = (Math.random() * 6.5 - 3) / 100;
-        currentPrice = currentPrice + (currentPrice * volatility);
-        
-        // Cơ chế chặn sàn giá thấp nhất không âm (ngưỡng an toàn tối thiểu $1.00)
-        if (currentPrice < 1) currentPrice = 1;
+        let totalCoinsValue = 0;
 
-        // Cập nhật cấu trúc mảng dữ liệu biểu đồ
-        timeLabels.push(getCurrentTime());
-        priceData.push(currentPrice);
+        // Cập nhật giá cho TOÀN BỘ danh sách coin, dù có đang mở tab đó hay không
+        Object.keys(coins).forEach(key => {
+            let coin = coins[key];
+            // Biến động ngẫu nhiên -2% đến +2.2%
+            let change = (Math.random() * 4.2 - 2) / 100;
+            coin.price = coin.price * (1 + change);
+            
+            // Lưu lịch sử
+            coin.history.push(coin.price);
+            if(coin.history.length > maxHistoryPoints) coin.history.shift();
 
-        // Sử dụng cấu trúc hàng đợi (Queue): Nếu vượt quá số điểm quy định, xóa điểm cũ nhất ở đầu mảng
-        if (priceData.length > maxDataPoints) {
-            timeLabels.shift();
-            priceData.shift();
-        }
-        
-        priceChart.update();
-        updateUI(oldPrice);
+            // Tính tổng giá trị tài sản
+            totalCoinsValue += coin.price * coin.balance;
+        });
+
+        // Cập nhật số dư tổng
+        elCashBalance.innerText = formatMoney(portfolio.cash);
+        elTotalNetWorth.innerText = formatMoney(portfolio.cash + totalCoinsValue);
+
+        // Chỉ cập nhật giao diện chi tiết cho Coin đang được chọn (Tab Active)
+        updateUI();
     }, 1500);
 
-    // --- KHỐI LOGIC XỬ LÝ KHỚP LỆNH MUA / BÁN ---
-    function executeTrade(type) {
-        const qty = parseFloat(inputQty.value);
+    // --- CẬP NHẬT GIAO DIỆN (CHỈ UPDATE COIN ĐANG CHỌN) ---
+    let lastPrice = 0;
+    function updateUI() {
+        const activeCoin = coins[activeCoinKey];
         
-        // Kiểm tra tính hợp lệ của dữ liệu đầu vào (phải là số dương)
-        if (isNaN(qty) || qty <= 0) {
-            showNotif("Số lượng nhập vào không hợp lệ!", "#f44336");
+        elActiveName.innerText = `${activeCoin.name} (${activeCoin.symbol})`;
+        elActivePrice.innerText = formatMoney(activeCoin.price);
+        elActiveBalance.innerText = `${activeCoin.balance.toLocaleString()} ${activeCoin.symbol}`;
+
+        // Đổi màu giá tăng/giảm
+        if (activeCoin.price >= lastPrice) {
+            elActivePrice.className = "price up";
+            chartInstance.data.datasets[0].borderColor = "var(--up-color)";
+            chartInstance.data.datasets[0].backgroundColor = "rgba(16, 185, 129, 0.1)"; // Màu xanh lá mờ
+        } else {
+            elActivePrice.className = "price down";
+            chartInstance.data.datasets[0].borderColor = "var(--down-color)";
+            chartInstance.data.datasets[0].backgroundColor = "rgba(239, 68, 68, 0.1)"; // Màu đỏ mờ
+        }
+        lastPrice = activeCoin.price;
+
+        // Đổ dữ liệu vào biểu đồ
+        chartInstance.data.datasets[0].data = activeCoin.history;
+        chartInstance.data.datasets[0].fill = true;
+        chartInstance.update();
+    }
+
+    // --- XỬ LÝ GIAO DỊCH ---
+    function executeTrade(type) {
+        const amount = parseFloat(inputAmount.value);
+        if (isNaN(amount) || amount <= 0) {
+            showNotification("Số lượng không hợp lệ!", false);
             return;
         }
 
-        const totalCost = qty * currentPrice;
+        const activeCoin = coins[activeCoinKey];
+        const totalCost = amount * activeCoin.price;
 
         if (type === 'BUY') {
-            // Nhánh xử lý lệnh mua: Kiểm tra số dư tiền mặt có đủ không
-            if (balance >= totalCost) {
-                balance -= totalCost;
-                assetsOwned += qty;
-                addHistoryRow('BUY', qty, currentPrice);
-                showNotif(`Khớp lệnh MUA: -${formatMoney(totalCost)}`, "#4caf50");
+            if (portfolio.cash >= totalCost) {
+                portfolio.cash -= totalCost;
+                activeCoin.balance += amount;
+                showNotification(`Đã mua ${amount} ${activeCoin.symbol} thành công!`, true);
             } else {
-                showNotif("Tài khoản không đủ số dư tiền mặt!", "#f44336");
+                showNotification("Không đủ tiền mặt!", false);
             }
-        } 
-        else if (type === 'SELL') {
-            // Nhánh xử lý lệnh bán: Kiểm tra số lượng tài sản nắm giữ có đủ để khớp lệnh không
-            if (assetsOwned >= qty) {
-                balance += totalCost;
-                assetsOwned -= qty;
-                addHistoryRow('SELL', qty, currentPrice);
-                showNotif(`Khớp lệnh BÁN: +${formatMoney(totalCost)}`, "#4caf50");
+        } else if (type === 'SELL') {
+            if (activeCoin.balance >= amount) {
+                portfolio.cash += totalCost;
+                activeCoin.balance -= amount;
+                showNotification(`Đã bán ${amount} ${activeCoin.symbol} thành công!`, true);
             } else {
-                showNotif("Số lượng V-COIN sở hữu không đủ để bán!", "#f44336");
+                showNotification(`Không đủ ${activeCoin.symbol} để bán!`, false);
             }
         }
-        updateUI(currentPrice);
+        
+        // Cập nhật lại ngay lập tức sau khi giao dịch
+        elCashBalance.innerText = formatMoney(portfolio.cash);
+        updateUI();
     }
+
+    // Khởi chạy lần đầu
+    renderTabs();
+    updateUI();
 </script>
 </body>
 </html>
-
