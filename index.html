@@ -2,260 +2,351 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sàn Giao Dịch Crypto Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Giao diện Mô phỏng OT</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- ROOT & RESET --- */
+        /* --- THIẾT LẬP MÀU SẮC ĐẶC TRƯNG --- */
         :root {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-hover: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #3b82f6;
-            --up-color: #10b981;
-            --down-color: #ef4444;
-            --border: #334155;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            min-height: 100vh;
-            padding: 20px;
+            --bg-base: #11131a;      /* Sidebar & Header */
+            --bg-main: #1a1d27;      /* Khu vực biểu đồ */
+            --bg-panel: #232733;     /* Bảng đặt lệnh */
+            --text-main: #ffffff;
+            --text-muted: #8a90a2;
+            --green: #00b061;
+            --red: #ff3e4b;
+            --accent: #2196f3;
+            --border: #2c313f;
         }
 
-        /* --- BỐ CỤC CHÍNH --- */
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Roboto', 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden; /* Giao diện App, không cuộn */
+        }
+
+        /* --- THANH ĐIỀU HƯỚNG TRÁI (SIDEBAR) --- */
+        .sidebar {
+            width: 64px;
+            background-color: var(--bg-base);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            z-index: 10;
+        }
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 20px;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: var(--bg-panel);
+            color: var(--text-main);
+        }
+
+        /* --- KHU VỰC CHÍNH --- */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- THANH TRÊN (HEADER) --- */
+        .topbar {
+            height: 60px;
+            background-color: var(--bg-base);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .asset-selector {
+            background-color: var(--bg-panel);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .asset-selector span { color: var(--green); }
+        
+        .account-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .demo-badge {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .balance { font-size: 18px; font-weight: bold; letter-spacing: 0.5px;}
+        .btn-deposit {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- KHU VỰC BIỂU ĐỒ & ĐẶT LỆNH --- */
+        .content-area {
+            flex: 1;
+            display: flex;
+            background-color: var(--bg-main);
+            position: relative;
+        }
+
+        .chart-section {
+            flex: 1;
+            padding: 20px;
+            position: relative;
+        }
+        .current-price-tag {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            background-color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            z-index: 5;
+            display: none; /* Ẩn tạm, Chart.js sẽ xử lý trục Y */
+        }
+
+        /* Bảng đặt lệnh bên phải */
+        .trading-panel {
+            width: 280px;
+            background-color: var(--bg-panel);
+            border-left: 1px solid var(--border);
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* --- HEADER & TỔNG TÀI SẢN --- */
-        .header-panel {
-            background-color: var(--bg-card);
-            border-radius: 16px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .net-worth-box h1 { font-size: 28px; color: var(--up-color); margin-top: 5px; }
-        .net-worth-box p { color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;}
-        .cash-box { text-align: right; }
-        .cash-box h2 { font-size: 20px; color: var(--text-main); margin-top: 5px; }
-
-        /* --- HỆ THỐNG TABS --- */
-        .tabs {
-            display: flex;
-            gap: 10px;
-            background-color: var(--bg-card);
+        .input-group {
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             padding: 10px;
-            border-radius: 12px;
-            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab-btn {
+        .input-group label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        .input-group input {
             background: transparent;
             border: none;
-            color: var(--text-muted);
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            color: var(--text-main);
+            font-size: 20px;
+            font-weight: bold;
+            outline: none;
+            width: 100%;
+        }
+        .stepper {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
             display: flex;
-            align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
-        .tab-btn:hover { background-color: var(--bg-hover); color: var(--text-main); }
-        .tab-btn.active { background-color: var(--accent); color: white; box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3); }
+        .stepper i { color: var(--text-muted); cursor: pointer; }
+        .stepper i:hover { color: var(--text-main); }
 
-        /* --- KHU VỰC GIAO DỊCH (CHART + PANEL) --- */
-        .main-dashboard {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-        .card {
-            background-color: var(--bg-card);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Thông tin Coin Đang chọn */
-        .active-coin-header {
+        .payout-info {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
+            color: var(--text-muted);
+            font-size: 14px;
+            padding: 0 5px;
         }
-        .active-coin-header h2 { font-size: 24px; }
-        .active-coin-header .price { font-size: 28px; font-weight: bold; }
-        .price.up { color: var(--up-color); }
-        .price.down { color: var(--down-color); }
+        .payout-info strong { color: var(--green); font-size: 16px; }
 
-        /* Biểu đồ */
-        .chart-container { width: 100%; height: 300px; position: relative; }
-
-        /* Bảng đặt lệnh */
-        .trade-form label { display: block; color: var(--text-muted); margin-bottom: 8px; font-size: 14px; }
-        .trade-form input {
+        .btn-trade {
             width: 100%;
-            background-color: var(--bg-main);
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .trade-form input:focus { border-color: var(--accent); }
-        
-        .btn-group { display: flex; gap: 10px; }
-        .btn {
-            flex: 1;
-            padding: 15px;
+            padding: 18px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            cursor: pointer;
             color: white;
-            transition: transform 0.1s, opacity 0.2s;
-        }
-        .btn:active { transform: scale(0.96); }
-        .btn:hover { opacity: 0.9; }
-        .btn-buy { background-color: var(--up-color); }
-        .btn-sell { background-color: var(--down-color); }
-
-        .coin-balance {
-            background-color: var(--bg-main);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
-            border: 1px solid var(--border);
+            align-items: center;
+            transition: opacity 0.2s;
         }
+        .btn-trade:active { transform: scale(0.98); }
+        .btn-trade:hover { opacity: 0.9; }
+        .btn-up { background-color: var(--green); margin-bottom: 15px; }
+        .btn-down { background-color: var(--red); }
 
-        #notification { text-align: center; margin-top: 15px; font-size: 14px; min-height: 20px; }
+        /* Danh sách lệnh đang mở */
+        .open-trades {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+        .trade-item {
+            background-color: var(--bg-main);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .trade-item .timer { font-family: monospace; font-size: 14px; }
 
         /* --- RESPONSIVE CHO ĐIỆN THOẠI --- */
         @media (max-width: 768px) {
-            .header-panel { flex-direction: column; align-items: flex-start; gap: 15px; }
-            .cash-box { text-align: left; }
-            .main-dashboard { grid-template-columns: 1fr; }
-            .chart-container { height: 220px; }
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: 50px; flex-direction: row; justify-content: space-around; border-right: none; border-bottom: 1px solid var(--border); padding-top: 0; }
+            .nav-item { margin-bottom: 0; height: 100%; }
+            .content-area { flex-direction: column; }
+            .chart-section { flex: 1; min-height: 250px; }
+            .trading-panel { width: 100%; height: auto; border-left: none; border-top: 1px solid var(--border); padding: 15px; gap: 15px; flex-direction: row; flex-wrap: wrap; }
+            .input-group { flex: 1; min-width: 45%; }
+            .action-buttons { width: 100%; display: flex; gap: 10px; }
+            .btn-trade { margin-bottom: 0; padding: 15px; }
+            .open-trades { width: 100%; margin-top: 0; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header-panel">
-        <div class="net-worth-box">
-            <p>Tổng Tài Sản (Net Worth)</p>
-            <h1 id="total-net-worth">$10,000.00</h1>
-        </div>
-        <div class="cash-box">
-            <p>Tiền Mặt (Khả dụng)</p>
-            <h2 id="cash-balance">$10,000.00</h2>
+    <nav class="sidebar">
+        <div class="nav-item active"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        <div class="nav-item"><i class="fa-solid fa-trophy"></i></div>
+        <div class="nav-item"><i class="fa-solid fa-circle-question"></i></div>
+    </nav>
+
+    <div class="main-wrapper">
+        <header class="topbar">
+            <div class="asset-selector">
+                <i class="fa-brands fa-bitcoin"></i> Bitcoin <span>82%</span> <i class="fa-solid fa-chevron-down" style="color:var(--text-muted); font-size:12px;"></i>
+            </div>
+            <div class="account-info">
+                <div style="text-align: right;">
+                    <span class="demo-badge">Tài khoản Demo</span>
+                    <div class="balance" id="account-balance">10,000.00 D</div>
+                </div>
+                <button class="btn-deposit">Thanh toán</button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="chart-section">
+                <canvas id="otChart"></canvas>
+            </div>
+
+            <aside class="trading-panel">
+                <div style="display: flex; width: 100%; gap: 10px; flex-wrap: wrap;">
+                    <div class="input-group" style="flex: 1;">
+                        <label>Số tiền</label>
+                        <input type="number" id="trade-amount" value="100" min="1">
+                        <div class="stepper">
+                            <i class="fa-solid fa-minus" onclick="adjustAmount(-10)"></i>
+                            <i class="fa-solid fa-plus" onclick="adjustAmount(10)"></i>
+                        </div>
+                    </div>
+                    <div class="input-group" style="flex: 1;">
+                        <label>Thời gian</label>
+                        <input type="text" value="00:10" readonly style="font-size: 18px;">
+                    </div>
+                </div>
+
+                <div class="payout-info">
+                    <span>Lợi nhuận</span>
+                    <strong id="potential-payout">+82.00 D</strong>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-trade btn-up" onclick="executeTrade('UP')">
+                        <span>TĂNG</span>
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                    <button class="btn-trade btn-down" onclick="executeTrade('DOWN')">
+                        <span>GIẢM</span>
+                        <i class="fa-solid fa-arrow-down"></i>
+                    </button>
+                </div>
+
+                <div class="open-trades">
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">LỆNH ĐANG MỞ (<span id="open-count">0</span>)</div>
+                    <div id="trades-container">
+                        </div>
+                </div>
+            </aside>
         </div>
     </div>
-
-    <div class="tabs" id="coin-tabs">
-        </div>
-
-    <div class="main-dashboard">
-        <div class="card">
-            <div class="active-coin-header">
-                <div>
-                    <h2 id="active-coin-name">Bitcoin (BTC)</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Cập nhật theo thời gian thực</p>
-                </div>
-                <div class="price up" id="active-coin-price">$0.00</div>
-            </div>
-            <div class="chart-container">
-                <canvas id="mainChart"></canvas>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">Đặt Lệnh Nhanh</h3>
-            
-            <div class="coin-balance">
-                <span style="color: var(--text-muted);">Sở hữu:</span>
-                <strong id="active-coin-balance">0.00</strong>
-            </div>
-
-            <div class="trade-form">
-                <label for="trade-amount">Số lượng muốn giao dịch:</label>
-                <input type="number" id="trade-amount" value="1" min="0.001" step="0.01">
-                
-                <div class="btn-group">
-                    <button class="btn btn-buy" onclick="executeTrade('BUY')">MUA VÀO</button>
-                    <button class="btn btn-sell" onclick="executeTrade('SELL')">BÁN RA</button>
-                </div>
-            </div>
-            <div id="notification"></div>
-        </div>
-    </div>
-</div>
 
 <script>
-    // --- QUẢN LÝ DỮ LIỆU CỐT LÕI ---
-    let portfolio = {
-        cash: 10000.00, // Vốn khởi điểm lớn hơn để dễ mua BTC
-    };
+    // --- BIẾN TRẠNG THÁI HỆ THỐNG ---
+    let balance = 10000.00;
+    let currentPrice = 65000.50;
+    const payoutRate = 0.82; // 82% lợi nhuận
+    const tradeDuration = 10; // Giả lập lệnh 10 giây để kiểm tra nhanh
+    let activeTrades = [];
 
-    // Cơ sở dữ liệu danh sách các loại tiền điện tử
-    const coins = {
-        'BTC': { name: 'Bitcoin', symbol: 'BTC', price: 65000, balance: 0, history: [], color: '#f59e0b', icon: 'fa-bitcoin' },
-        'ETH': { name: 'Ethereum', symbol: 'ETH', price: 3500, balance: 0, history: [], color: '#627eea', icon: 'fa-brands fa-ethereum' },
-        'SOL': { name: 'Solana', symbol: 'SOL', price: 150, balance: 0, history: [], color: '#14f195', icon: 'fa-solid fa-link' },
-        'DOGE': { name: 'Dogecoin', symbol: 'DOGE', price: 0.15, balance: 0, history: [], color: '#eab308', icon: 'fa-solid fa-dog' }
-    };
+    // Cấu hình mảng dữ liệu biểu đồ
+    const maxDataPoints = 30;
+    let priceData = Array(maxDataPoints).fill(currentPrice);
+    let timeLabels = Array(maxDataPoints).fill('');
 
-    let activeCoinKey = 'BTC'; // Coin đang được chọn để hiển thị
-    const maxHistoryPoints = 25; // Số điểm trên biểu đồ
-    const timeLabels = Array(maxHistoryPoints).fill(''); 
+    // --- CẤU HÌNH BIỂU ĐỒ AREA (TẠO GRADIENT) ---
+    const ctx = document.getElementById('otChart').getContext('2d');
+    
+    // Tạo màu Gradient cho miền dưới đường line
+    const gradientFill = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientFill.addColorStop(0, 'rgba(33, 150, 243, 0.4)');
+    gradientFill.addColorStop(1, 'rgba(33, 150, 243, 0.0)');
 
-    // --- CÁC PHẦN TỬ GIAO DIỆN ---
-    const elTotalNetWorth = document.getElementById('total-net-worth');
-    const elCashBalance = document.getElementById('cash-balance');
-    const elTabsContainer = document.getElementById('coin-tabs');
-    const elActiveName = document.getElementById('active-coin-name');
-    const elActivePrice = document.getElementById('active-coin-price');
-    const elActiveBalance = document.getElementById('active-coin-balance');
-    const inputAmount = document.getElementById('trade-amount');
-    const elNotif = document.getElementById('notification');
-
-    // --- KHỞI TẠO BIỂU ĐỒ (CHART.JS) ---
-    const ctx = document.getElementById('mainChart').getContext('2d');
-    let chartInstance = new Chart(ctx, {
+    const chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: timeLabels,
             datasets: [{
-                data: [],
-                borderColor: '#3b82f6',
+                data: priceData,
+                borderColor: '#2196f3', // Màu xanh dương chuẩn
+                backgroundColor: gradientFill,
                 borderWidth: 2,
-                tension: 0.3,
-                pointRadius: 0
+                fill: true,
+                tension: 0.1,
+                pointRadius: 0,
+                pointHitRadius: 10
             }]
         },
         options: {
@@ -264,140 +355,140 @@
             animation: { duration: 0 },
             scales: {
                 x: { display: false },
-                y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
+                y: { 
+                    position: 'right', 
+                    grid: { color: '#2c313f' }, 
+                    ticks: { color: '#8a90a2', font: { size: 11 } }
+                }
             },
-            plugins: { legend: { display: false }, tooltip: { enabled: true } }
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            }
         }
     });
 
-    // --- HÀM TRỢ GIÚP ---
-    function formatMoney(amount) {
-        // Tự động định dạng số thập phân tuỳ vào giá trị (VD: DOGE cần nhiều số lẻ hơn BTC)
-        let decimals = amount < 1 ? 4 : 2;
-        return '$' + amount.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    // --- CÁC HÀM CẬP NHẬT GIAO DIỆN ---
+    const elBalance = document.getElementById('account-balance');
+    const elAmount = document.getElementById('trade-amount');
+    const elPayout = document.getElementById('potential-payout');
+    const elTradesContainer = document.getElementById('trades-container');
+    const elOpenCount = document.getElementById('open-count');
+
+    function formatCurrency(num) {
+        return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' D';
     }
 
-    function showNotification(msg, isSuccess) {
-        elNotif.innerText = msg;
-        elNotif.style.color = isSuccess ? 'var(--up-color)' : 'var(--down-color)';
-        setTimeout(() => elNotif.innerText = '', 3000);
+    function adjustAmount(val) {
+        let current = parseInt(elAmount.value) || 0;
+        let newVal = current + val;
+        if (newVal < 1) newVal = 1;
+        elAmount.value = newVal;
+        updatePayout();
     }
 
-    // --- KHỞI TẠO TABS ---
-    function renderTabs() {
-        elTabsContainer.innerHTML = '';
-        Object.keys(coins).forEach(key => {
-            const coin = coins[key];
-            const btn = document.createElement('button');
-            btn.className = `tab-btn ${key === activeCoinKey ? 'active' : ''}`;
-            btn.innerHTML = `<i class="${coin.icon}"></i> ${coin.symbol}`;
-            btn.onclick = () => switchTab(key);
-            elTabsContainer.appendChild(btn);
-        });
+    function updatePayout() {
+        let amt = parseFloat(elAmount.value) || 0;
+        elPayout.innerText = '+' + formatCurrency(amt * payoutRate);
     }
 
-    function switchTab(key) {
-        activeCoinKey = key;
-        renderTabs(); // Cập nhật lại màu sắc tab
-        updateUI();   // Vẽ lại giao diện theo coin mới
-    }
+    // Lắng nghe sự kiện người dùng tự gõ số tiền
+    elAmount.addEventListener('input', updatePayout);
 
-    // --- VÒNG LẶP THỊ TRƯỜNG TỔNG (CHẠY NGẦM CHO TẤT CẢ COIN) ---
-    // Khởi tạo lịch sử giá ban đầu cho đỡ trống
-    Object.keys(coins).forEach(key => {
-        for(let i=0; i<maxHistoryPoints; i++) coins[key].history.push(coins[key].price);
-    });
-
+    // --- ĐỘNG CƠ GIÁ THỊ TRƯỜNG ---
     setInterval(() => {
-        let totalCoinsValue = 0;
+        // Biến động giá random
+        const change = (Math.random() * 20 - 10); // +/- 10 giá đơn vị
+        currentPrice += change;
+        
+        priceData.push(currentPrice);
+        priceData.shift();
+        chart.update();
 
-        // Cập nhật giá cho TOÀN BỘ danh sách coin, dù có đang mở tab đó hay không
-        Object.keys(coins).forEach(key => {
-            let coin = coins[key];
-            // Biến động ngẫu nhiên -2% đến +2.2%
-            let change = (Math.random() * 4.2 - 2) / 100;
-            coin.price = coin.price * (1 + change);
-            
-            // Lưu lịch sử
-            coin.history.push(coin.price);
-            if(coin.history.length > maxHistoryPoints) coin.history.shift();
+    }, 1000); // Mỗi 1 giây cập nhật giá 1 lần
 
-            // Tính tổng giá trị tài sản
-            totalCoinsValue += coin.price * coin.balance;
+    // --- LOGIC KHỚP LỆNH QUYỀN CHỌN THEO THỜI GIAN (FIXED TIME TRADES) ---
+    function executeTrade(direction) {
+        const amount = parseFloat(elAmount.value);
+        if (isNaN(amount) || amount <= 0 || amount > balance) return;
+
+        // Trừ tiền ngay lập tức
+        balance -= amount;
+        elBalance.innerText = formatCurrency(balance);
+
+        // Tạo đối tượng lưu trữ lệnh
+        const trade = {
+            id: Date.now(),
+            direction: direction,
+            entryPrice: currentPrice,
+            amount: amount,
+            timeLeft: tradeDuration
+        };
+        
+        activeTrades.push(trade);
+        renderActiveTrades();
+
+        // Bộ đếm ngược độc lập cho từng lệnh
+        const timer = setInterval(() => {
+            trade.timeLeft--;
+            renderActiveTrades();
+
+            if (trade.timeLeft <= 0) {
+                clearInterval(timer);
+                resolveTrade(trade);
+            }
+        }, 1000);
+    }
+
+    function renderActiveTrades() {
+        elTradesContainer.innerHTML = '';
+        elOpenCount.innerText = activeTrades.length;
+
+        activeTrades.forEach(trade => {
+            const div = document.createElement('div');
+            div.className = 'trade-item';
+            const icon = trade.direction === 'UP' ? '<i class="fa-solid fa-arrow-up" style="color:var(--green)"></i>' : '<i class="fa-solid fa-arrow-down" style="color:var(--red)"></i>';
+            const statusColor = getStatusColor(trade);
+
+            div.innerHTML = `
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    ${icon}
+                    <span style="color: ${statusColor}">$${trade.amount}</span>
+                </div>
+                <div class="timer">00:${trade.timeLeft.toString().padStart(2, '0')}</div>
+            `;
+            elTradesContainer.appendChild(div);
         });
-
-        // Cập nhật số dư tổng
-        elCashBalance.innerText = formatMoney(portfolio.cash);
-        elTotalNetWorth.innerText = formatMoney(portfolio.cash + totalCoinsValue);
-
-        // Chỉ cập nhật giao diện chi tiết cho Coin đang được chọn (Tab Active)
-        updateUI();
-    }, 1500);
-
-    // --- CẬP NHẬT GIAO DIỆN (CHỈ UPDATE COIN ĐANG CHỌN) ---
-    let lastPrice = 0;
-    function updateUI() {
-        const activeCoin = coins[activeCoinKey];
-        
-        elActiveName.innerText = `${activeCoin.name} (${activeCoin.symbol})`;
-        elActivePrice.innerText = formatMoney(activeCoin.price);
-        elActiveBalance.innerText = `${activeCoin.balance.toLocaleString()} ${activeCoin.symbol}`;
-
-        // Đổi màu giá tăng/giảm
-        if (activeCoin.price >= lastPrice) {
-            elActivePrice.className = "price up";
-            chartInstance.data.datasets[0].borderColor = "var(--up-color)";
-            chartInstance.data.datasets[0].backgroundColor = "rgba(16, 185, 129, 0.1)"; // Màu xanh lá mờ
-        } else {
-            elActivePrice.className = "price down";
-            chartInstance.data.datasets[0].borderColor = "var(--down-color)";
-            chartInstance.data.datasets[0].backgroundColor = "rgba(239, 68, 68, 0.1)"; // Màu đỏ mờ
-        }
-        lastPrice = activeCoin.price;
-
-        // Đổ dữ liệu vào biểu đồ
-        chartInstance.data.datasets[0].data = activeCoin.history;
-        chartInstance.data.datasets[0].fill = true;
-        chartInstance.update();
     }
 
-    // --- XỬ LÝ GIAO DỊCH ---
-    function executeTrade(type) {
-        const amount = parseFloat(inputAmount.value);
-        if (isNaN(amount) || amount <= 0) {
-            showNotification("Số lượng không hợp lệ!", false);
-            return;
-        }
-
-        const activeCoin = coins[activeCoinKey];
-        const totalCost = amount * activeCoin.price;
-
-        if (type === 'BUY') {
-            if (portfolio.cash >= totalCost) {
-                portfolio.cash -= totalCost;
-                activeCoin.balance += amount;
-                showNotification(`Đã mua ${amount} ${activeCoin.symbol} thành công!`, true);
-            } else {
-                showNotification("Không đủ tiền mặt!", false);
-            }
-        } else if (type === 'SELL') {
-            if (activeCoin.balance >= amount) {
-                portfolio.cash += totalCost;
-                activeCoin.balance -= amount;
-                showNotification(`Đã bán ${amount} ${activeCoin.symbol} thành công!`, true);
-            } else {
-                showNotification(`Không đủ ${activeCoin.symbol} để bán!`, false);
-            }
-        }
-        
-        // Cập nhật lại ngay lập tức sau khi giao dịch
-        elCashBalance.innerText = formatMoney(portfolio.cash);
-        updateUI();
+    // Tính toán xem lệnh đang tạm thời lãi hay lỗ để đổi màu hiển thị
+    function getStatusColor(trade) {
+        if (trade.direction === 'UP') return currentPrice > trade.entryPrice ? 'var(--green)' : 'var(--red)';
+        if (trade.direction === 'DOWN') return currentPrice < trade.entryPrice ? 'var(--green)' : 'var(--red)';
+        return 'var(--text-muted)';
     }
 
-    // Khởi chạy lần đầu
-    renderTabs();
-    updateUI();
+    // Xử lý kết quả khi hết thời gian
+    function resolveTrade(trade) {
+        // Xóa lệnh khỏi danh sách đang mở
+        activeTrades = activeTrades.filter(t => t.id !== trade.id);
+        
+        let isWin = false;
+        if (trade.direction === 'UP' && currentPrice > trade.entryPrice) isWin = true;
+        if (trade.direction === 'DOWN' && currentPrice < trade.entryPrice) isWin = true;
+
+        if (isWin) {
+            const profit = trade.amount + (trade.amount * payoutRate);
+            balance += profit;
+        } 
+        // Nếu hòa (currentPrice == entryPrice), thường sẽ hoàn vốn, nhưng để đơn giản ta tính là không cộng tiền lãi, chỉ trả lại vốn.
+        else if (currentPrice === trade.entryPrice) {
+            balance += trade.amount;
+        }
+
+        elBalance.innerText = formatCurrency(balance);
+        renderActiveTrades();
+    }
 </script>
 </body>
 </html>
