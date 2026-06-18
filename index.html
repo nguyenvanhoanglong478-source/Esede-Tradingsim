@@ -3,459 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sàn Giao Dịch Mobile Pro</title>
+    <title>Pixel Trader Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- HỆ THỐNG MÀU SẮC CHUẨN UI TÀI CHÍNH --- */
         :root {
-            --bg-dark: #0b0e11;
-            --bg-panel: #181a20;
-            --bg-input: #2b3139;
-            --text-main: #eaecef;
-            --text-muted: #848e9c;
-            --green: #0ecb81;
-            --red: #f6465d;
-            --accent: #fcd535;
-            --border: #2b3139;
+            --bg-dark: #000000;
+            --bg-panel: #1a1a1a;
+            --primary: #ffffff;
+            --green: #39ff14; /* Neon Green */
+            --red: #ff003c;   /* Arcade Red */
+            --yellow: #fde910;
+            --blue: #00e5ff;
+            --border-size: 3px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        
+        * { 
+            box-sizing: border-box; margin: 0; padding: 0; user-select: none;
+            font-family: 'Press Start 2P', cursive;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* Ngăn cuộn trang */
+            background-color: var(--bg-dark); color: var(--primary);
+            height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow: hidden;
+            /* Hiệu ứng sọc màn hình CRT mờ */
+            background-image: linear-gradient(transparent 50%, rgba(255,255,255,0.05) 50%);
+            background-size: 100% 4px;
         }
 
-        /* --- 1. HEADER CHỨA TÀI KHOẢN & TÀI SẢN --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 15px;
+        /* --- BORDERS & SHADOWS KIỂU PIXEL --- */
+        .pixel-box {
             background-color: var(--bg-panel);
-            border-bottom: 1px solid var(--border);
-            height: 65px;
-        }
-        
-        /* Nút chọn tài sản */
-        .asset-selector {
-            background-color: var(--bg-input);
-            padding: 8px 12px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 15px;
-        }
-        .asset-selector span { color: var(--green); font-size: 13px; }
-
-        /* Nút quản lý tài khoản */
-        .account-selector {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            background-color: var(--bg-input);
-            padding: 6px 12px;
-            border-radius: 8px;
-            min-width: 130px;
-        }
-        .account-type { font-size: 11px; color: var(--accent); font-weight: bold; text-transform: uppercase; }
-        .account-balance { font-size: 15px; font-weight: bold; margin-top: 2px;}
-
-        /* --- 2. KHU VỰC BIỂU ĐỒ (Tự động lấp đầy khoảng trống) --- */
-        .chart-area {
-            flex: 1;
-            position: relative;
-            width: 100%;
-            padding-top: 10px;
-        }
-        
-        /* --- 3. BẢNG ĐIỀU KHIỂN GIAO DỊCH --- */
-        .trading-panel {
-            background-color: var(--bg-panel);
-            padding: 15px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .input-row {
-            display: flex;
-            gap: 15px;
-        }
-        .input-box {
-            flex: 1;
-            background-color: var(--bg-input);
-            border-radius: 8px;
+            border: var(--border-size) solid var(--primary);
+            box-shadow: 4px 4px 0px rgba(255,255,255,0.2);
             padding: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
         }
-        .input-box label { font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
-        .input-box input {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            width: 100%;
-            outline: none;
-        }
-        .stepper {
-            position: absolute;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            top: 50%;
-            padding: 0 15px;
-            pointer-events: none; /* Để không chắn input */
-        }
-        .stepper i { color: var(--text-muted); font-size: 18px; pointer-events: auto; }
-        .stepper i:active { color: var(--text-main); }
 
-        .profit-info {
-            display: flex;
-            justify-content: center;
-            font-size: 14px;
-            color: var(--text-muted);
+        .pixel-btn {
+            background-color: var(--bg-dark);
+            color: var(--primary);
+            border: var(--border-size) solid var(--primary);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 10px;
+            padding: 10px;
+            box-shadow: 3px 3px 0px var(--primary);
+            transition: all 0.1s;
         }
-        .profit-info strong { color: var(--green); margin-left: 5px; font-size: 16px; }
+        .pixel-btn:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px var(--primary);
+        }
 
-        .action-buttons { display: flex; gap: 15px; }
-        .btn-trade {
-            flex: 1;
-            padding: 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* --- HUD --- */
+        .hud { display: flex; flex-direction: column; gap: 10px; padding: 10px; }
+        .hud-top { display: flex; justify-content: space-between; align-items: flex-end; }
+        .money { font-size: 14px; color: var(--green); text-shadow: 2px 2px 0px #005500; margin-bottom: 5px; }
+        .passive-income { font-size: 8px; color: var(--yellow); }
+        .level { font-size: 10px; color: var(--blue); }
+        
+        .action-row { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-shop { flex: 1; background-color: var(--yellow); color: black; border-color: black; box-shadow: 3px 3px 0px #888; }
+        
+        /* --- BIỂU ĐỒ --- */
+        .chart-area { flex: 1; position: relative; width: 100%; padding: 10px; }
+        
+        /* --- BẢNG ĐIỀU KHIỂN --- */
+        .trading-panel { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        
+        .trade-input-wrapper { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .trade-input-wrapper .pixel-btn { padding: 12px; font-size: 14px; }
+        .trade-input {
+            flex: 1; background: black; border: var(--border-size) solid white; color: white;
+            font-size: 16px; text-align: center; padding: 10px; outline: none;
+            font-family: 'Press Start 2P', cursive;
         }
-        .btn-trade:active { filter: brightness(0.8); transform: scale(0.98); }
-        .btn-up { background-color: var(--green); }
-        .btn-down { background-color: var(--red); }
 
-        /* --- 4. BOTTOM NAVIGATION BAR --- */
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            height: 60px;
-            background-color: var(--bg-panel);
-            border-top: 1px solid var(--border);
-            padding-bottom: env(safe-area-inset-bottom); /* Hỗ trợ tai thỏ/thanh điều hướng ảo */
-        }
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-muted);
-            font-size: 11px;
-            gap: 4px;
-        }
-        .nav-item i { font-size: 20px; }
-        .nav-item.active { color: var(--text-main); }
+        .trade-btns { display: flex; gap: 10px; }
+        .btn-up { flex: 1; background-color: var(--green); color: black; border-color: black; box-shadow: 3px 3px 0px #005500; font-size: 12px;}
+        .btn-down { flex: 1; background-color: var(--red); color: white; border-color: white; box-shadow: 3px 3px 0px #550000; font-size: 12px;}
 
-        /* Thông báo lệnh (Toast) */
-        #toast-container {
-            position: absolute;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            z-index: 100;
-            width: 90%;
+        /* --- MODAL SHOP CỬA HÀNG --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 200;
+            padding: 15px;
         }
-        .toast {
-            background-color: var(--bg-input);
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            border-left: 4px solid var(--accent);
-            animation: slideDown 0.3s ease-out;
+        .modal-content {
+            width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 15px;
         }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--yellow); border-bottom: 2px dashed var(--yellow); padding-bottom: 10px; }
+        .close-btn { background: none; border: none; color: white; font-size: 16px; cursor: pointer; }
+        
+        .item-card {
+            display: flex; justify-content: space-between; align-items: center;
+            border: 2px solid white; padding: 10px; background: #111;
+        }
+        .item-info { display: flex; flex-direction: column; gap: 6px; width: 65%; }
+        .item-name { font-size: 10px; line-height: 1.4; color: var(--blue); }
+        .item-desc { font-size: 8px; color: var(--green); }
+        .item-owned { font-size: 8px; color: #888; }
+        .btn-buy { width: 30%; font-size: 8px; padding: 8px; background: white; color: black; border-color: black;}
 
+        /* --- THÔNG BÁO --- */
+        #toast-container { position: absolute; top: 120px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; flex-direction: column; gap: 5px; width: 90%; pointer-events: none;}
+        .toast { background-color: black; padding: 12px; font-size: 8px; line-height: 1.5; text-align: center; border: 2px solid white; box-shadow: 4px 4px 0px rgba(255,255,255,0.3); animation: slideUp 0.2s; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="asset-selector" onclick="cycleAsset()">
-            <i class="fa-brands fa-bitcoin" id="asset-icon"></i>
-            <div id="asset-name">Bitcoin</div>
-            <span id="asset-rate">82%</span>
+    <div class="hud pixel-box">
+        <div class="hud-top">
+            <div>
+                <div class="level" id="level-display">LV: 1</div>
+                <div style="font-size: 8px; color: #888; margin-top: 5px;">STREAK: <span id="streak-display">0</span></div>
+            </div>
+            <div style="text-align: right;">
+                <div class="money" id="balance-display">1000$</div>
+                <div class="passive-income" id="income-display">+0$/giây</div>
+            </div>
+        </div>
+        <div class="action-row">
+            <button class="pixel-btn btn-shop" onclick="openShop()"><i class="fa-solid fa-cart-shopping"></i> CỬA HÀNG</button>
+        </div>
+    </div>
+
+    <div class="chart-area pixel-box" style="border-top: none; border-bottom: none; box-shadow: none;">
+        <canvas id="gameChart"></canvas>
+    </div>
+
+    <div class="trading-panel pixel-box">
+        <div id="toast-container"></div>
+        
+        <div style="font-size: 10px; text-align: center; color: var(--yellow);">MÃ: PIXEL-COIN (80%)</div>
+        
+        <div class="trade-input-wrapper">
+            <button class="pixel-btn" onclick="adjustAmount(-50)">-</button>
+            <input type="number" class="trade-input" id="trade-amount" value="100" min="10">
+            <button class="pixel-btn" onclick="adjustAmount(50)">+</button>
         </div>
         
-        <div class="account-selector" onclick="toggleAccount()">
-            <div class="account-type" id="acc-type-label">TÀI KHOẢN DEMO <i class="fa-solid fa-rotate"></i></div>
-            <div class="account-balance" id="acc-balance">10,000.00 $</div>
+        <div class="trade-btns">
+            <button class="pixel-btn btn-up" onclick="executeTrade('UP')">TĂNG</button>
+            <button class="pixel-btn btn-down" onclick="executeTrade('DOWN')">GIẢM</button>
         </div>
-    </header>
-
-    <div id="toast-container"></div>
-
-    <div class="chart-area">
-        <canvas id="mobileChart"></canvas>
     </div>
 
-    <div class="trading-panel">
-        <div class="input-row">
-            <div class="input-box">
-                <label>Số tiền ($)</label>
-                <div class="stepper">
-                    <i class="fa-solid fa-minus" onclick="adjustAmount(-10)"></i>
-                    <i class="fa-solid fa-plus" onclick="adjustAmount(10)"></i>
+    <div class="modal-overlay" id="shop-modal">
+        <div class="modal-content pixel-box">
+            <div class="modal-header">
+                <span>SHOP TÀI SẢN</span>
+                <button class="close-btn" onclick="closeShop()">X</button>
+            </div>
+            <div id="shop-list" style="display: flex; flex-direction: column; gap: 10px;">
                 </div>
-                <input type="number" id="trade-amount" value="100" min="1">
-            </div>
-            <div class="input-box">
-                <label>Thời gian</label>
-                <input type="text" value="00:10" readonly>
-            </div>
-        </div>
-
-        <div class="profit-info">
-            Lợi nhuận dự kiến: <strong id="potential-payout">+82.00 $</strong>
-        </div>
-
-        <div class="action-buttons">
-            <button class="btn-trade btn-up" onclick="executeTrade('UP')">
-                <span>TĂNG</span> <i class="fa-solid fa-arrow-up"></i>
-            </button>
-            <button class="btn-trade btn-down" onclick="executeTrade('DOWN')">
-                <span>GIẢM</span> <i class="fa-solid fa-arrow-down"></i>
-            </button>
         </div>
     </div>
-
-    <nav class="bottom-nav">
-        <div class="nav-item active">
-            <i class="fa-solid fa-chart-line"></i>
-            <span>Giao dịch</span>
-        </div>
-        <div class="nav-item">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>Lịch sử</span>
-        </div>
-        <div class="nav-item">
-            <i class="fa-solid fa-wallet"></i>
-            <span>Ví tiền</span>
-        </div>
-        <div class="nav-item">
-            <i class="fa-solid fa-user"></i>
-            <span>Hồ sơ</span>
-        </div>
-    </nav>
 
 <script>
-    // --- 1. CẤU TRÚC DỮ LIỆU CỐT LÕI ---
-    
-    // Quản lý trạng thái đa tài khoản
-    const accounts = {
-        DEMO: { balance: 10000.00, label: "TÀI KHOẢN DEMO", color: "var(--accent)" },
-        REAL: { balance: 0.00, label: "TÀI KHOẢN THỰC", color: "var(--green)" }
+    // --- 1. DỮ LIỆU & LOCAL STORAGE ---
+    const defaultData = { 
+        balance: 1000, level: 1, xp: 0, xpNeeded: 100, streak: 0, baseRate: 0.80,
+        assets: { miner: 0, pickaxe: 0, server: 0 } // Số lượng tài sản sở hữu
     };
-    let currentAcc = 'DEMO';
-
-    // Cấu trúc đa tài sản giao dịch
-    const assets = [
-        { id: 'BTC', name: 'Bitcoin', rate: 0.82, price: 65000, vol: 15, icon: 'fa-brands fa-bitcoin' },
-        { id: 'ETH', name: 'Ethereum', rate: 0.79, price: 3500, vol: 5, icon: 'fa-brands fa-ethereum' },
-        { id: 'EURUSD', name: 'EUR/USD', rate: 0.90, price: 1.0850, vol: 0.0005, icon: 'fa-solid fa-euro-sign' }
-    ];
-    let activeAssetIndex = 0;
     
-    const tradeDuration = 10; // Giây
+    let gameData = JSON.parse(localStorage.getItem('pixel_trading_data')) || defaultData;
+    // Cập nhật cấu trúc nếu người chơi cũ chưa có object assets
+    if(!gameData.assets) gameData.assets = { miner: 0, pickaxe: 0, server: 0 };
+    gameData.streak = 0; 
 
-    // Dữ liệu biểu đồ
-    const maxDataPoints = 40;
-    let priceData = Array(maxDataPoints).fill(assets[0].price);
-    let timeLabels = Array(maxDataPoints).fill('');
+    // Cửa hàng vật phẩm
+    const shopItems = {
+        miner: { id: 'miner', name: 'Máy Đào Coin Cùi', cost: 500, income: 5, icon: 'fa-microchip' },
+        pickaxe: { id: 'pickaxe', name: 'Cúp Kim Cương', cost: 2500, income: 30, icon: 'fa-hammer' },
+        server: { id: 'server', name: 'Trang Trại Server', cost: 10000, income: 150, icon: 'fa-server' }
+    };
 
-    // --- 2. CÁC PHẦN TỬ GIAO DIỆN ---
-    const elBalance = document.getElementById('acc-balance');
-    const elAccLabel = document.getElementById('acc-type-label');
-    const elAmount = document.getElementById('trade-amount');
-    const elPayout = document.getElementById('potential-payout');
-    const elAssetName = document.getElementById('asset-name');
-    const elAssetRate = document.getElementById('asset-rate');
-    const elAssetIcon = document.getElementById('asset-icon');
-    const toastContainer = document.getElementById('toast-container');
+    let currentPrice = 100.00;
+    const tradeDuration = 5; // 5 giây
 
-    // --- 3. KHỞI TẠO BIỂU ĐỒ (CHART.JS) ---
-    const ctx = document.getElementById('mobileChart').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(14, 203, 129, 0.3)');
-    gradient.addColorStop(1, 'rgba(14, 203, 129, 0.0)');
+    // --- 2. CẬP NHẬT GIAO DIỆN CHUNG ---
+    function saveData() { localStorage.setItem('pixel_trading_data', JSON.stringify(gameData)); }
 
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: timeLabels,
-            datasets: [{
-                data: priceData,
-                borderColor: '#0ecb81',
-                backgroundColor: gradient,
-                borderWidth: 2,
-                fill: true,
-                tension: 0.1,
-                pointRadius: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 0 },
-            layout: { padding: { right: 50 } }, // Chừa chỗ cho giá
-            scales: {
-                x: { display: false },
-                y: { position: 'right', grid: { color: '#2b3139' }, ticks: { color: '#848e9c', font: { size: 10 } } }
-            },
-            plugins: { legend: { display: false }, tooltip: { enabled: false } }
+    function getTotalIncome() {
+        let total = 0;
+        for (let key in shopItems) {
+            total += gameData.assets[key] * shopItems[key].income;
         }
-    });
-
-    // --- 4. HÀM XỬ LÝ LOGIC ---
-
-    function formatMoney(num, assetId = 'USD') {
-        let decimals = assetId === 'EURUSD' ? 4 : 2;
-        return num.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+        return total;
     }
 
-    // Đổi Tài khoản (Demo <-> Thực)
-    function toggleAccount() {
-        currentAcc = currentAcc === 'DEMO' ? 'REAL' : 'DEMO';
-        elAccLabel.innerHTML = `${accounts[currentAcc].label} <i class="fa-solid fa-rotate"></i>`;
-        elAccLabel.style.color = accounts[currentAcc].color;
-        updateBalanceDisplay();
+    function updateHUD() {
+        document.getElementById('balance-display').innerText = Math.floor(gameData.balance) + '$';
+        document.getElementById('level-display').innerText = `LV: ${gameData.level}`;
+        document.getElementById('streak-display').innerText = gameData.streak;
+        document.getElementById('income-display').innerText = `+${getTotalIncome()}$/giây`;
     }
 
-    // Đổi Tài sản giao dịch
-    function cycleAsset() {
-        activeAssetIndex = (activeAssetIndex + 1) % assets.length;
-        const asset = assets[activeAssetIndex];
-        
-        elAssetName.innerText = asset.name;
-        elAssetRate.innerText = (asset.rate * 100) + '%';
-        elAssetIcon.className = asset.icon;
-        
-        // Reset lại dữ liệu biểu đồ theo giá trị tài sản mới
-        priceData.fill(asset.price);
-        updatePayoutDisplay();
-        chart.update();
-    }
-
-    function updateBalanceDisplay() {
-        elBalance.innerText = formatMoney(accounts[currentAcc].balance) + ' $';
+    function showToast(msg, color = 'white') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast'; toast.style.color = color; toast.style.borderColor = color;
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
     }
 
     function adjustAmount(val) {
-        let current = parseInt(elAmount.value) || 0;
-        let newVal = current + val;
-        if (newVal < 1) newVal = 1;
-        elAmount.value = newVal;
-        updatePayoutDisplay();
+        let input = document.getElementById('trade-amount');
+        let newVal = (parseInt(input.value) || 0) + val;
+        input.value = Math.max(newVal, 10);
     }
 
-    function updatePayoutDisplay() {
-        let amt = parseFloat(elAmount.value) || 0;
-        let rate = assets[activeAssetIndex].rate;
-        elPayout.innerText = '+' + formatMoney(amt * rate) + ' $';
+    // --- 3. LOGIC CỬA HÀNG TÀI SẢN ---
+    function openShop() {
+        renderShop();
+        document.getElementById('shop-modal').style.display = 'flex';
     }
-    elAmount.addEventListener('input', updatePayoutDisplay);
+    function closeShop() { document.getElementById('shop-modal').style.display = 'none'; }
 
-    // Hiển thị thông báo (Toast) trên màn hình
-    function showToast(message, color = 'var(--accent)') {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.style.borderLeftColor = color;
-        toast.innerHTML = `<span>${message}</span>`;
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
+    function renderShop() {
+        const container = document.getElementById('shop-list');
+        container.innerHTML = '';
+        for (let key in shopItems) {
+            let item = shopItems[key];
+            let owned = gameData.assets[key];
+            container.innerHTML += `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name"><i class="fa-solid ${item.icon}"></i> ${item.name}</div>
+                        <div class="item-desc">+${item.income}$/giây</div>
+                        <div class="item-owned">Đã có: ${owned}</div>
+                    </div>
+                    <button class="pixel-btn btn-buy" onclick="buyItem('${key}')">${item.cost}$</button>
+                </div>
+            `;
+        }
     }
 
-    // Động cơ tính toán giá ngẫu nhiên
+    function buyItem(key) {
+        let item = shopItems[key];
+        if (gameData.balance >= item.cost) {
+            gameData.balance -= item.cost;
+            gameData.assets[key]++;
+            saveData();
+            updateHUD();
+            renderShop(); // Cập nhật lại số lượng trong shop
+            showToast(`Đã mua ${item.name}!`, 'var(--green)');
+        } else {
+            showToast(`Thiếu tiền! Cần ${item.cost}$`, 'var(--red)');
+        }
+    }
+
+    // VÒNG LẶP THU NHẬP THỤ ĐỘNG (Chạy mỗi 1 giây)
     setInterval(() => {
-        const asset = assets[activeAssetIndex];
-        const change = (Math.random() * (asset.vol * 2)) - asset.vol;
-        asset.price += change;
-        
-        priceData.push(asset.price);
-        priceData.shift();
+        let income = getTotalIncome();
+        if (income > 0) {
+            gameData.balance += income;
+            updateHUD();
+            saveData();
+        }
+    }, 1000);
 
-        // Đổi màu đường line tùy theo giá đang tăng hay giảm
-        const isUp = priceData[maxDataPoints - 1] >= priceData[maxDataPoints - 2];
-        chart.data.datasets[0].borderColor = isUp ? '#0ecb81' : '#f6465d';
+    // --- 4. BIỂU ĐỒ PIXEL ---
+    const ctx = document.getElementById('gameChart').getContext('2d');
+    let priceData = Array(25).fill(currentPrice);
+    
+    // Cấu hình phông chữ Pixel cho trục Chart.js
+    Chart.defaults.font.family = "'Press Start 2P', cursive";
+    Chart.defaults.color = "#ffffff";
 
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: { 
+            labels: Array(25).fill(''), 
+            datasets: [{ 
+                data: priceData, 
+                borderColor: '#39ff14', 
+                borderWidth: 3, 
+                stepped: true, // Chuyển đường cong thành bậc thang 8-bit
+                pointRadius: 0 
+            }] 
+        },
+        options: { 
+            responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, 
+            scales: { 
+                x: { display: false }, 
+                y: { 
+                    position: 'right', 
+                    grid: { color: '#333' }, 
+                    ticks: { font: { size: 8 } } 
+                } 
+            }, 
+            plugins: { legend: { display: false }, tooltip: { enabled: false } } 
+        }
+    });
+
+    setInterval(() => {
+        currentPrice += (Math.random() * 6 - 3);
+        priceData.push(currentPrice); priceData.shift();
+        chart.data.datasets[0].borderColor = priceData[24] >= priceData[23] ? '#39ff14' : '#ff003c';
         chart.update();
     }, 1000);
 
     // --- 5. LOGIC KHỚP LỆNH ---
     function executeTrade(direction) {
-        const amount = parseFloat(elAmount.value);
-        if (isNaN(amount) || amount <= 0 || amount > accounts[currentAcc].balance) {
-            showToast("Số dư không đủ hoặc số tiền không hợp lệ!", "var(--red)");
-            return;
-        }
+        const amount = parseInt(document.getElementById('trade-amount').value);
+        if (amount > gameData.balance) { showToast("KHÔNG ĐỦ TIỀN!", "var(--red)"); return; }
 
-        const asset = assets[activeAssetIndex];
-        const entryPrice = asset.price;
+        gameData.balance -= amount;
+        updateHUD(); saveData();
+        const entryPrice = currentPrice;
+        showToast("ĐANG KHỚP LỆNH...", "var(--blue)");
 
-        // Trừ tiền ngay khi vào lệnh
-        accounts[currentAcc].balance -= amount;
-        updateBalanceDisplay();
-        
-        const dirText = direction === 'UP' ? 'TĂNG' : 'GIẢM';
-        const dirColor = direction === 'UP' ? 'var(--green)' : 'var(--red)';
-        showToast(`Mở lệnh ${dirText} ${amount}$ (${asset.name})`, dirColor);
-
-        // Chạy ngầm định đếm ngược kết quả
         setTimeout(() => {
-            const exitPrice = asset.price;
-            let isWin = false;
-            
-            if (direction === 'UP' && exitPrice > entryPrice) isWin = true;
-            if (direction === 'DOWN' && exitPrice < entryPrice) isWin = true;
+            const exitPrice = currentPrice;
+            let isWin = (direction === 'UP' && exitPrice > entryPrice) || (direction === 'DOWN' && exitPrice < entryPrice);
 
             if (isWin) {
-                const profit = amount + (amount * asset.rate);
-                accounts[currentAcc].balance += profit;
-                showToast(`Thắng lệnh ${asset.name}: +${formatMoney(profit)}$`, "var(--green)");
+                const profit = amount + (amount * gameData.baseRate);
+                gameData.balance += profit;
+                gameData.streak++;
+                
+                // Logic tăng cấp đơn giản
+                gameData.xp += 40;
+                if(gameData.xp >= gameData.xpNeeded) {
+                    gameData.level++; gameData.xp = 0; gameData.xpNeeded *= 1.5;
+                    showToast(`LEVEL UP! LV.${gameData.level}`, 'var(--yellow)');
+                }
+                
+                showToast(`WIN! +${Math.floor(profit)}$`, "var(--green)");
             } else if (exitPrice === entryPrice) {
-                accounts[currentAcc].balance += amount; // Hòa vốn
-                showToast(`Hòa vốn lệnh ${asset.name}`, "var(--text-muted)");
+                gameData.balance += amount; 
+                showToast("HÒA!", "white");
             } else {
-                showToast(`Thua lệnh ${asset.name}: -${amount}$`, "var(--red)");
+                gameData.streak = 0; 
+                showToast(`LOSE! -${amount}$`, "var(--red)");
             }
             
-            updateBalanceDisplay();
+            saveData(); updateHUD();
         }, tradeDuration * 1000);
     }
 
-    // Khởi chạy giao diện lần đầu
-    updateBalanceDisplay();
-    updatePayoutDisplay();
+    updateHUD();
 </script>
 </body>
-    </html>
-    
+</html>
