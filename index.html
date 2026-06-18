@@ -3,321 +3,487 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pixel CS:GO Gacha</title>
+    <title>Pixel Gacha Universe Animated</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #000000;
-            --bg-panel: #111111;
-            --primary: #ffffff;
-            --border-size: 3px;
-            
-            /* Tông màu độ hiếm CS:GO chuẩn Pixel */
-            --blue: #0055ff;   /* Mil-Spec */
-            --purple: #8800ff; /* Restricted */
-            --pink: #ff00ff;   /* Classified */
-            --red: #ff0000;    /* Covert */
-            --gold: #ffaa00;   /* Exceedingly Rare */
-            --market-up: #39ff14; /* Neon Green */
-            --market-down: #ff003c; /* Neon Red */
+            --bg-dark: #050505; --bg-panel: #111111; --primary: #ffffff;
+            --t1: #0055ff; --t2: #8800ff; --t3: #ff00ff; --t4: #ff0000; --t5: #ffaa00;
+            --bronze: #cd7f32; --silver: #c0c0c0;
+            --up: #39ff14; --down: #ff003c;
         }
 
-        * { 
-            box-sizing: border-box; margin: 0; padding: 0; user-select: none;
-            font-family: 'Press Start 2P', cursive;
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Press Start 2P', cursive; }
+        body { background-color: var(--bg-dark); color: var(--primary); height: 100vh; display: flex; flex-direction: column; overflow: hidden; perspective: 1000px; }
+
+        /* --- KHO HIỆU ỨNG (ANIMATIONS) TỐI ƯU GPU --- */
+        @keyframes slideFadeUp {
+            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.5); }
+            70% { transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            20% { transform: translateX(-4px) rotate(-2deg); }
+            40% { transform: translateX(4px) rotate(2deg); }
+            60% { transform: translateX(-4px) rotate(-2deg); }
+            80% { transform: translateX(4px) rotate(2deg); }
+        }
+        @keyframes neonGlow {
+            0%, 100% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor; }
+            50% { text-shadow: 0 0 2px currentColor, 0 0 5px currentColor; }
+        }
+        @keyframes pulseBorder {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4); }
+            50% { box-shadow: 0 0 0 4px rgba(57, 255, 20, 0); }
         }
 
-        body {
-            background-color: var(--bg-dark); color: var(--primary);
-            height: 100vh; width: 100vw; display: flex; flex-direction: column; overflow: hidden;
-            background-image: linear-gradient(transparent 50%, rgba(255,255,255,0.05) 50%);
-            background-size: 100% 4px;
-        }
-
-        /* --- BỘ KHUNG PIXEL --- */
-        .pixel-box {
-            background-color: var(--bg-panel);
-            border: var(--border-size) solid var(--primary);
-            box-shadow: 4px 4px 0px rgba(255,255,255,0.2);
-            padding: 10px;
-        }
-        
+        /* --- UI COMPONENTS CHUNG --- */
         .pixel-btn {
-            background-color: var(--bg-dark); color: var(--primary);
-            border: var(--border-size) solid var(--primary);
-            cursor: pointer; text-transform: uppercase;
-            font-size: 10px; padding: 12px;
-            box-shadow: 3px 3px 0px var(--primary);
-            transition: all 0.1s;
+            background: var(--bg-dark); color: var(--primary); border: 2px solid var(--primary);
+            padding: 10px; font-size: 8px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 2px 2px 0px var(--primary); transition: transform 0.1s, box-shadow 0.1s, background 0.2s; 
+            text-align: center; position: relative; overflow: hidden;
         }
-        .pixel-btn:active { transform: translate(3px, 3px); box-shadow: 0px 0px 0px transparent; }
-        .pixel-btn:disabled { background-color: #333; color: #777; border-color: #555; box-shadow: none; transform: none; cursor: not-allowed; }
+        .pixel-btn:hover { filter: brightness(1.2); }
+        .pixel-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+        .pixel-btn:disabled { background: #333; color: #777; border-color: #555; box-shadow: none; transform: none; cursor: not-allowed; animation: none; filter: none; }
 
-        /* --- HEADER & HUD --- */
-        header { display: flex; justify-content: space-between; align-items: flex-end; padding: 10px; border-bottom: 2px dashed #555; }
-        .title { font-size: 12px; color: var(--gold); text-shadow: 2px 2px 0px #885500; line-height: 1.5;}
-        .balance-box { text-align: right; }
-        .balance-val { font-size: 14px; color: var(--market-up); text-shadow: 2px 2px 0px #005500; margin-bottom: 6px;}
-        .inventory-val { font-size: 8px; color: #aaa; }
-
-        /* --- BIỂU ĐỒ THỊ TRƯỜNG --- */
-        .chart-container { height: 28vh; width: 100%; position: relative; padding: 10px; border-bottom: 2px dashed #555; }
-        .market-status { position: absolute; top: 15px; left: 15px; z-index: 10; }
-        .market-title { font-size: 8px; color: #888; margin-bottom: 8px; }
-        .market-multiplier { font-size: 16px; text-shadow: 2px 2px 0px #222; }
-        .market-up { color: var(--market-up); }
-        .market-down { color: var(--market-down); }
-
-        /* --- KHU VỰC GACHA --- */
-        .gacha-panel { padding: 15px 10px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
-        .result-display {
-            min-height: 70px; width: 100%; max-width: 350px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; border: 4px solid #333; background: #000; padding: 10px;
+        /* Lớp giả tạo hiệu ứng lướt sáng trên nút */
+        .pixel-btn::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg) translateX(-100%); transition: 0.5s;
         }
-        .result-name { font-size: 10px; line-height: 1.4; margin-bottom: 8px; }
-        .result-price { font-size: 8px; color: #fff; }
-        .btn-open { width: 100%; max-width: 350px; background-color: var(--gold); color: black; border-color: black; box-shadow: 4px 4px 0px #885500; font-size: 14px; font-weight: bold; }
+        .pixel-btn:active::after { transform: rotate(45deg) translateX(100%); transition: 0s; }
 
-        /* --- KHO ĐỒ --- */
-        .inventory-panel { flex: 1; padding: 10px; overflow-y: auto; }
-        .inv-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 8px; color: #888; }
-        .btn-sell-all { font-size: 8px; padding: 8px; background: var(--market-down); color: white; border-color: white; box-shadow: 2px 2px 0px white;}
+        /* --- HEADER --- */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 2px dashed #444; background: var(--bg-panel); z-index: 10; }
+        .header-title { font-size: 10px; color: var(--t5); animation: neonGlow 2s infinite; }
+        .header-balance { font-size: 12px; color: var(--up); text-shadow: 2px 2px 0px #004400; transition: transform 0.2s; }
+        .header-balance.bump { transform: scale(1.2); } /* Hiệu ứng phình to khi tiền tăng */
+
+        /* --- SCREENS (SPA) --- */
+        .screen { display: none; flex: 1; overflow-y: auto; padding: 10px; padding-bottom: 70px; }
+        .screen.active { display: block; animation: slideFadeUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* --- HOME / GACHA --- */
+        .case-list { display: flex; flex-direction: column; gap: 15px; }
+        .case-card { 
+            border: 2px solid; padding: 15px; background: #0a0a0a; display: flex; flex-direction: column; gap: 10px; text-align: center; 
+            animation: float 4s ease-in-out infinite; transition: transform 0.2s;
+        }
+        /* Delay animation để các thẻ bay lệch nhịp nhau cho tự nhiên */
+        .case-card:nth-child(2) { animation-delay: 1s; }
+        .case-card:nth-child(3) { animation-delay: 2s; }
         
-        .grid-inventory { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding-bottom: 20px;}
-        .item-card {
-            background-color: #050505; border: 2px solid white; padding: 8px;
-            display: flex; flex-direction: column; justify-content: space-between; gap: 8px;
-            box-shadow: 3px 3px 0px #222;
-        }
-        .item-name { font-size: 8px; line-height: 1.4; word-wrap: break-word; }
-        .item-price { font-size: 8px; color: white; }
-        .btn-sell-single {
-            width: 100%; padding: 8px; font-size: 8px;
-            background: transparent; color: white; border: 1px dashed white; cursor: pointer;
-        }
-        .btn-sell-single:active { background: white; color: black; }
+        .case-card.shaking { animation: shake 0.4s ease-in-out; border-color: white !important; background: #222; }
+        
+        .case-title { font-size: 12px; text-shadow: 2px 2px 0px #000; }
+        .case-desc { font-size: 7px; color: #aaa; line-height: 1.5; }
+        .case-preview { display: flex; justify-content: center; gap: 5px; margin: 5px 0; }
+        .color-dot { width: 10px; height: 10px; border: 1px solid #fff; transition: transform 0.2s; }
+        .color-dot:hover { transform: scale(1.5); }
 
-        /* Cuộn màn hình */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: white; }
+        /* --- GRIDS (BACKPACK / TRADE) --- */
+        .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .item-card { 
+            border: 2px solid #444; padding: 8px; background: #000; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(255,255,255,0.1); }
+        .item-name { font-size: 7px; line-height: 1.4; }
+        .item-price { font-size: 8px; color: #fff; transition: color 0.3s; }
+
+        /* --- CRAFTING --- */
+        .craft-card { border: 2px solid #555; padding: 15px; background: #0a0a0a; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; transition: transform 0.2s; }
+        .craft-card.ready { animation: pulseBorder 1.5s infinite; border-color: var(--up); }
+        .craft-header { display: flex; justify-content: space-between; font-size: 8px; }
+        .craft-bar { width: 100%; height: 10px; background: #000; border: 1px solid #555; }
+        .craft-fill { height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+
+        /* --- QUESTS --- */
+        .quest-card { border: 2px dashed #555; padding: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; background: #111; animation: popIn 0.3s; }
+        .quest-info { display: flex; flex-direction: column; gap: 6px; width: 70%; }
+        .quest-title { font-size: 8px; color: var(--t5); }
+        .btn-claim { font-size: 7px; padding: 6px; background: var(--t5); color: #000; border-color: #000; animation: pulseBorder 1.5s infinite; }
+
+        /* --- PROFILE --- */
+        .profile-stat { border-bottom: 2px dashed #333; padding: 15px 0; display: flex; justify-content: space-between; font-size: 10px; transition: background 0.2s; }
+        .profile-stat:hover { background: rgba(255,255,255,0.05); padding-left: 5px; }
+
+        /* --- MODAL TRADE --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(2px); display: none; flex-direction: column; z-index: 100; padding: 15px; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-box { background: var(--bg-panel); border: 2px solid white; padding: 10px; display: flex; flex-direction: column; gap: 10px; transform: scale(0.9); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal.show .modal-box { transform: scale(1); }
+        
+        .modal-header { display: flex; justify-content: space-between; font-size: 10px; border-bottom: 2px solid #555; padding-bottom: 10px; }
+        .chart-wrapper { height: 200px; width: 100%; background: #000; border: 1px solid #333; padding: 5px; }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--bg-panel); border-top: 2px solid #555; display: flex; z-index: 50; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; color: #666; font-size: 6px; cursor: pointer; transition: 0.2s; }
+        .nav-item.active { color: var(--primary); transform: translateY(-5px); }
+        .nav-item i { font-size: 14px; transition: transform 0.2s; }
+        .nav-item.active i { transform: scale(1.2); color: var(--up); text-shadow: 0 0 10px var(--up); }
+
+        /* --- TOAST --- */
+        #toast-container { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 5px; width: 90%; pointer-events: none;}
+        .toast { background: rgba(0,0,0,0.9); padding: 12px; font-size: 7px; text-align: center; border: 2px solid white; line-height: 1.5; animation: slideFadeUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="title"><i class="fa-solid fa-box-open"></i> GACHA<br><span style="font-size: 8px; color: #888;">CASE: $2.50</span></div>
-        <div class="balance-box">
-            <div class="balance-val" id="balance-display">100.00$</div>
-            <div class="inventory-val">KHO: <span id="inv-value-display">0.00$</span></div>
-        </div>
+        <div class="header-title" id="screen-title">CỬA HÀNG HÒM</div>
+        <div class="header-balance" id="header-balance">10000.00$</div>
     </header>
 
-    <div class="chart-container">
-        <div class="market-status">
-            <div class="market-title">THỊ TRƯỜNG CHUNG</div>
-            <div class="market-multiplier market-up" id="market-display">x1.000</div>
+    <div id="toast-container"></div>
+
+    <div id="screen-home" class="screen active"><div class="case-list" id="case-container"></div></div>
+    <div id="screen-trade" class="screen"><div class="grid-container" id="trade-grid"></div></div>
+    <div id="screen-backpack" class="screen">
+        <div style="display: flex; justify-content: space-between; font-size: 8px; margin-bottom: 10px; color: #aaa;">
+            <span>SỐ LƯỢNG: <span id="bp-count">0</span></span>
+            <span>TỔNG: <span id="bp-value" style="color:var(--up)">0.00$</span></span>
         </div>
-        <canvas id="marketChart"></canvas>
+        <div class="grid-container" id="backpack-grid"></div>
+    </div>
+    <div id="screen-craft" class="screen"><div id="craft-container"></div></div>
+    <div id="screen-quest" class="screen"><div id="quest-container"></div></div>
+    <div id="screen-profile" class="screen">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <i class="fa-solid fa-user-astronaut" style="font-size: 40px; color: var(--t5); margin-bottom: 10px; animation: float 3s infinite;"></i>
+        </div>
+        <div class="profile-stat"><span>SỐ DƯ</span><span class="profile-val" id="prof-balance" style="color: var(--up)">0$</span></div>
+        <div class="profile-stat"><span>GIÁ TRỊ KHO</span><span class="profile-val" id="prof-inv-value">0$</span></div>
+        <div class="profile-stat"><span>SỐ HÒM ĐÃ MỞ</span><span class="profile-val" id="prof-cases">0</span></div>
+        <button class="pixel-btn" style="width: 100%; margin-top: 20px; border-color: var(--down); color: var(--down);" onclick="resetGame()">XÓA DỮ LIỆU</button>
     </div>
 
-    <div class="gacha-panel">
-        <div class="result-display" id="result-box">
-            <div style="color: #555; font-size: 8px;">[ CHƯA MỞ RƯƠNG ]</div>
-        </div>
-        <button class="pixel-btn btn-open" id="btn-open" onclick="openCase()">MỞ NGAY ($2.50)</button>
-    </div>
-
-    <div class="inventory-panel">
-        <div class="inv-header">
-            <span>SỐ LƯỢNG: <span id="inv-count">0</span></span>
-            <button class="pixel-btn btn-sell-all" onclick="sellAll()">BÁN HẾT</button>
-        </div>
-        <div class="grid-inventory" id="inventory-grid">
+    <div class="modal" id="trade-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span id="modal-item-name" style="animation: neonGlow 1.5s infinite;">ITEM</span>
+                <button class="pixel-btn" style="padding: 5px;" onclick="closeModal()">X</button>
             </div>
+            <div class="chart-wrapper"><canvas id="itemChart"></canvas></div>
+            <div style="text-align: center; font-size: 10px; margin: 5px 0;">GIÁ: <span id="modal-item-price" style="color: var(--up); transition: 0.3s;">0$</span></div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="pixel-btn" style="flex: 1; background: var(--up); color: #000;" id="btn-modal-buy">MUA</button>
+                <button class="pixel-btn" style="flex: 1; background: var(--down); color: #fff;" id="btn-modal-sell">BÁN</button>
+            </div>
+        </div>
     </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home')"><i class="fa-solid fa-box-open"></i><span>HOME</span></div>
+        <div class="nav-item" onclick="switchTab('trade')"><i class="fa-solid fa-chart-line"></i><span>TRADE</span></div>
+        <div class="nav-item" onclick="switchTab('craft')"><i class="fa-solid fa-hammer"></i><span>CHẾ TÁC</span></div>
+        <div class="nav-item" onclick="switchTab('backpack')"><i class="fa-solid fa-backpack"></i><span>KHO ĐỒ</span></div>
+        <div class="nav-item" onclick="switchTab('quest')"><i class="fa-solid fa-scroll"></i><span>NHIỆM VỤ</span></div>
+        <div class="nav-item" onclick="switchTab('profile')"><i class="fa-solid fa-user"></i><span>HỒ SƠ</span></div>
+    </nav>
 
 <script>
-    // --- 1. DỮ LIỆU CỐT LÕI ---
-    const CASE_PRICE = 2.50;
-    let balance = 100.00;
-    let inventory = [];
-    let marketMultiplier = 1.000; 
+    // --- DATABASE & STATE ---
+    const defaultData = { balance: 10000.00, casesOpened: 0, inventory: [], questClaimed: [] };
+    let player = JSON.parse(localStorage.getItem('pixelGachaSave')) || defaultData;
+    if(!player.questClaimed) player.questClaimed = [];
 
-    // Hệ thống Loot Pool chuẩn CS:GO với màu sắc Pixel
-    const lootPool = [
-        { name: "P250 Sand Dune", color: "var(--blue)", basePrice: 0.10, weight: 79.92 },
-        { name: "M4A1-S Cyrex", color: "var(--purple)", basePrice: 1.50, weight: 15.98 },
-        { name: "AK-47 Asiimov", color: "var(--pink)", basePrice: 8.50, weight: 3.20 },
-        { name: "AWP Dragon Lore", color: "var(--red)", basePrice: 65.00, weight: 0.64 },
-        { name: "★ Butterfly Knife", color: "var(--gold)", basePrice: 350.00, weight: 0.26 }
+    function saveGame() { localStorage.setItem('pixelGachaSave', JSON.stringify(player)); updateHeaderBalance(); }
+    function resetGame() { if(confirm("Xóa dữ liệu?")) { localStorage.removeItem('pixelGachaSave'); location.reload(); } }
+
+    let marketHistory = Array(30).fill(1.000);
+    let currentMultiplier = 1.000;
+
+    const casesDB = [
+        { id: 'c1', name: 'HÒM ĐỒNG', price: 50, color: 'var(--bronze)', pool: [ { n: "Găng tay rách", c: "var(--t1)", p: 5, t: 1, w: 80 }, { n: "Dao gỉ", c: "var(--t2)", p: 35, t: 2, w: 18 }, { n: "Mũ chiến thuật", c: "var(--t3)", p: 120, t: 3, w: 2 } ] },
+        { id: 'c2', name: 'HÒM BẠC', price: 250, color: 'var(--silver)', pool: [ { n: "Súng USP", c: "var(--t2)", p: 35, t: 2, w: 70 }, { n: "M4A4 Cơ bản", c: "var(--t3)", p: 120, t: 3, w: 25 }, { n: "AK-47 Redline", c: "var(--t4)", p: 450, t: 4, w: 5 } ] },
+        { id: 'c3', name: 'HÒM VÀNG', price: 1000, color: 'var(--t5)', pool: [ { n: "M4A4 Cơ bản", c: "var(--t3)", p: 120, t: 3, w: 60 }, { n: "AK-47 Redline", c: "var(--t4)", p: 450, t: 4, w: 35 }, { n: "★ Karambit", c: "var(--t5)", p: 3000, t: 5, w: 5 } ] }
     ];
 
-    // --- 2. CẤU HÌNH BIỂU ĐỒ PIXEL ---
-    Chart.defaults.font.family = "'Press Start 2P', cursive";
-    Chart.defaults.color = "#aaaaaa";
-    
-    const ctx = document.getElementById('marketChart').getContext('2d');
-    const maxDataPoints = 25;
-    let marketData = Array(maxDataPoints).fill(marketMultiplier);
+    const marketItemsDB = [];
+    casesDB.forEach(c => c.pool.forEach(item => { if (!marketItemsDB.find(i => i.n === item.n)) marketItemsDB.push({ id: 'item_' + marketItemsDB.length, n: item.n, c: item.c, baseP: item.p, t: item.t }); }));
 
-    const chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: Array(maxDataPoints).fill(''),
-            datasets: [{
-                data: marketData,
-                borderColor: '#39ff14',
-                borderWidth: 2,
-                stepped: true, // Nét đứt bậc thang chuẩn Pixel
-                pointRadius: 0
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
-            layout: { padding: { top: 40 } },
-            scales: { x: { display: false }, y: { position: 'right', grid: { color: '#222' }, ticks: { font: { size: 7 } } } },
-            plugins: { legend: { display: false }, tooltip: { enabled: false } }
-        }
-    });
+    const questsDB = [
+        { id: 'q1', title: 'Mở 5 hòm', target: 5, reward: 500 },
+        { id: 'q2', title: 'Mở 20 hòm', target: 20, reward: 2500 },
+        { id: 'q3', title: 'Mở 50 hòm', target: 50, reward: 10000 }
+    ];
 
-    // --- 3. ĐỘNG CƠ THỊ TRƯỜNG ---
+    // --- SYSTEM FUNCTIONS ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        document.getElementById(`screen-${tabId}`).classList.add('active');
+        
+        const titles = { home: 'CỬA HÀNG', trade: 'THỊ TRƯỜNG', craft: 'CHẾ TÁC', backpack: 'TÚI ĐỒ', quest: 'NHIỆM VỤ', profile: 'HỒ SƠ' };
+        document.getElementById('screen-title').innerText = titles[tabId];
+
+        if (tabId === 'backpack') renderBackpack();
+        if (tabId === 'craft') renderCrafting();
+        if (tabId === 'quest') renderQuests();
+        if (tabId === 'profile') renderProfile();
+    }
+
+    function showToast(msg, color = 'white') {
+        const c = document.getElementById('toast-container');
+        const t = document.createElement('div');
+        t.className = 'toast'; t.style.borderColor = color; t.innerHTML = msg;
+        c.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, 2000);
+    }
+
+    function updateHeaderBalance() { 
+        const balEl = document.getElementById('header-balance');
+        balEl.innerText = player.balance.toFixed(2) + '$'; 
+        // Hiệu ứng bump khi tiền thay đổi
+        balEl.classList.remove('bump');
+        void balEl.offsetWidth; // Trigger reflow
+        balEl.classList.add('bump');
+    }
+
+    // --- MARKET ENGINE ---
+    Chart.defaults.font.family = "'Press Start 2P', cursive"; Chart.defaults.color = "#aaaaaa";
+    let modalChartInstance = null; let currentActiveTradeItem = null;
+
     setInterval(() => {
-        const volatility = (Math.random() * 8 - 4) / 100;
-        marketMultiplier *= (1 + volatility);
-        if (marketMultiplier < 0.1) marketMultiplier = 0.1;
+        currentMultiplier *= (1 + (Math.random() * 6 - 3) / 100);
+        if (currentMultiplier < 0.1) currentMultiplier = 0.1;
+        marketHistory.push(currentMultiplier); marketHistory.shift();
 
-        marketData.push(marketMultiplier);
-        marketData.shift();
-
-        const isUp = marketData[maxDataPoints - 1] >= marketData[maxDataPoints - 2];
-        chart.data.datasets[0].borderColor = isUp ? '#39ff14' : '#ff003c';
-        chart.update();
-
-        const elMarket = document.getElementById('market-display');
-        elMarket.innerText = 'x' + marketMultiplier.toFixed(3);
-        elMarket.className = `market-multiplier ${isUp ? 'market-up' : 'market-down'}`;
-
-        // Cập nhật giá kho đồ mà không cần render lại toàn bộ HTML
-        updateInventoryPrices();
+        if(document.getElementById('screen-trade').classList.contains('active')) renderTradeMarket();
+        if(document.getElementById('screen-backpack').classList.contains('active')) renderBackpack();
+        if(currentActiveTradeItem && document.getElementById('trade-modal').classList.contains('show')) updateModalLivePrice();
     }, 1500);
 
-    // --- 4. GACHA LOGIC ---
-    function rollGacha() {
-        let rand = Math.random() * 100;
-        let cumulativeWeight = 0;
-        for (let i = 0; i < lootPool.length; i++) {
-            cumulativeWeight += lootPool[i].weight;
-            if (rand <= cumulativeWeight) return lootPool[i];
-        }
-        return lootPool[0];
-    }
-
-    function openCase() {
-        if (balance < CASE_PRICE) {
-            alert("HẾT TIỀN!"); return;
-        }
-
-        balance -= CASE_PRICE;
-        updateBalanceUI();
-        
-        const btn = document.getElementById('btn-open');
-        const resultBox = document.getElementById('result-box');
-        
-        btn.disabled = true;
-        btn.innerText = "MỞ...";
-        resultBox.style.borderColor = "#333";
-        resultBox.innerHTML = `<div style="color: #fff; font-size: 8px;">ĐANG QUAY...</div>`;
-
-        setTimeout(() => {
-            const pulled = rollGacha();
-            const item = {
-                id: Date.now() + Math.floor(Math.random()*1000), // ID duy nhất
-                name: pulled.name, color: pulled.color, basePrice: pulled.basePrice
-            };
-            
-            inventory.unshift(item); // Thêm lên đầu mảng
-            
-            const currentVal = item.basePrice * marketMultiplier;
-            resultBox.style.borderColor = item.color;
-            resultBox.innerHTML = `
-                <div class="result-name" style="color: ${item.color}">${item.name}</div>
-                <div class="result-price">GIÁ TT: ${currentVal.toFixed(2)}$</div>
-            `;
-
-            renderFullInventory(); // Có đồ mới nên phải vẽ lại 1 lần
-            btn.disabled = false;
-            btn.innerText = "MỞ NGAY ($2.50)";
-        }, 400);
-    }
-
-    // --- 5. KHO ĐỒ & UI ---
-    function updateBalanceUI() {
-        document.getElementById('balance-display').innerText = balance.toFixed(2) + '$';
-    }
-
-    // Hàm vẽ lại HTML toàn bộ kho (Chỉ gọi khi Mở hòm hoặc Bán)
-    function renderFullInventory() {
-        const grid = document.getElementById('inventory-grid');
-        grid.innerHTML = '';
-        document.getElementById('inv-count').innerText = inventory.length;
-
-        let totalValue = 0;
-        inventory.forEach(item => {
-            const currentVal = item.basePrice * marketMultiplier;
-            totalValue += currentVal;
-            
-            grid.innerHTML += `
-                <div class="item-card" id="card-${item.id}" style="border-top: 4px solid ${item.color};">
-                    <div class="item-name" style="color: ${item.color}">${item.name}</div>
-                    <div>
-                        <div class="item-price" id="price-${item.id}">${currentVal.toFixed(2)}$</div>
-                        <button class="btn-sell-single" style="margin-top: 8px;" onclick="sellItem(${item.id})">BÁN NGAY</button>
-                    </div>
+    // --- VIEWS ---
+    function renderHome() {
+        const container = document.getElementById('case-container');
+        container.innerHTML = '';
+        casesDB.forEach(c => {
+            let dots = c.pool.map(p => `<div class="color-dot" style="background:${p.c}"></div>`).join('');
+            container.innerHTML += `
+                <div class="case-card" id="card-${c.id}" style="border-color: ${c.color}">
+                    <div class="case-title" style="color: ${c.color}">${c.name}</div>
+                    <div class="case-preview">${dots}</div>
+                    <button class="pixel-btn" style="background: ${c.color}; color: #000;" onclick="openCase('${c.id}')">MỞ (${c.price}$)</button>
                 </div>
             `;
         });
-        document.getElementById('inv-value-display').innerText = totalValue.toFixed(2) + '$';
     }
 
-    // Hàm cập nhật NHẸ chỉ số tiền (Gọi mỗi 1.5s để chống giật màn hình)
-    function updateInventoryPrices() {
-        let totalValue = 0;
-        inventory.forEach(item => {
-            const currentVal = item.basePrice * marketMultiplier;
-            totalValue += currentVal;
+    function openCase(caseId) {
+        const c = casesDB.find(x => x.id === caseId);
+        if (player.balance < c.price) { showToast('KHÔNG ĐỦ TIỀN!', 'var(--down)'); return; }
+        
+        // Hiệu ứng rung hòm
+        const cardEl = document.getElementById(`card-${caseId}`);
+        cardEl.classList.add('shaking');
+        setTimeout(() => cardEl.classList.remove('shaking'), 400);
+
+        setTimeout(() => {
+            player.balance -= c.price;
+            player.casesOpened++;
             
-            // Chỉ đổi chữ số trong thẻ span, không đụng tới HTML khác
-            const priceEl = document.getElementById(`price-${item.id}`);
-            if(priceEl) priceEl.innerText = currentVal.toFixed(2) + '$';
-        });
-        document.getElementById('inv-value-display').innerText = totalValue.toFixed(2) + '$';
+            let rand = Math.random() * 100, cum = 0, pulled = c.pool[0];
+            for (let p of c.pool) { cum += p.w; if (rand <= cum) { pulled = p; break; } }
+
+            player.inventory.unshift({ id: Date.now() + Math.random(), n: pulled.n, c: pulled.c, baseP: pulled.p, t: pulled.t });
+            saveGame();
+            
+            showToast(`NHẬN ĐƯỢC:<br><span style="color:${pulled.c}">${pulled.n}</span>`, pulled.c);
+        }, 400); // Đợi rung xong mới ra đồ
     }
 
-    function sellItem(id) {
-        const index = inventory.findIndex(i => i.id === id);
-        if (index > -1) {
-            const item = inventory[index];
-            balance += (item.basePrice * marketMultiplier);
-            inventory.splice(index, 1);
-            updateBalanceUI();
-            renderFullInventory();
+    function renderTradeMarket() {
+        const container = document.getElementById('trade-grid');
+        container.innerHTML = '';
+        marketItemsDB.forEach((item, index) => {
+            const livePrice = item.baseP * currentMultiplier;
+            container.innerHTML += `
+                <div class="item-card" style="border-top: 3px solid ${item.c}; cursor:pointer; animation-delay: ${index * 0.05}s;" onclick="openTradeModal('${item.id}')">
+                    <div class="item-name" style="color: ${item.c}">${item.n}</div>
+                    <div class="item-price">${livePrice.toFixed(2)}$</div>
+                </div>
+            `;
+        });
+    }
+
+    const tierColors = { 1: "var(--t1)", 2: "var(--t2)", 3: "var(--t3)", 4: "var(--t4)", 5: "var(--t5)" };
+    function renderCrafting() {
+        const container = document.getElementById('craft-container');
+        container.innerHTML = '';
+        let counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        player.inventory.forEach(item => { if(item.t < 5) counts[item.t]++; });
+
+        for(let t = 1; t <= 4; t++) {
+            let pct = Math.min((counts[t] / 10) * 100, 100);
+            let canCraft = counts[t] >= 10;
+            container.innerHTML += `
+                <div class="craft-card ${canCraft ? 'ready' : ''}" style="border-color: ${tierColors[t]}">
+                    <div class="craft-header"><span style="color: ${tierColors[t]}">BẬC ${t}</span><span>${counts[t]}/10</span></div>
+                    <div class="craft-bar"><div class="craft-fill" style="width:${pct}%; background:${tierColors[t]}"></div></div>
+                    <button class="pixel-btn" ${canCraft ? '' : 'disabled'} onclick="craftItem(${t})">TIẾN HÀNH GHÉP</button>
+                </div>
+            `;
         }
     }
 
-    function sellAll() {
-        if (inventory.length === 0) return;
-        let total = 0;
-        inventory.forEach(item => total += (item.basePrice * marketMultiplier));
-        balance += total;
-        inventory = [];
-        updateBalanceUI();
-        renderFullInventory();
+    function craftItem(tier) {
+        let removed = 0;
+        for (let i = player.inventory.length - 1; i >= 0; i--) {
+            if (player.inventory[i].t === tier) { player.inventory.splice(i, 1); removed++; if (removed === 10) break; }
+        }
+        const nextTierPool = marketItemsDB.filter(i => i.t === tier + 1);
+        const crafted = nextTierPool[Math.floor(Math.random() * nextTierPool.length)];
+
+        player.inventory.unshift({ id: Date.now() + Math.random(), n: crafted.n, c: crafted.c, baseP: crafted.baseP, t: crafted.t });
+        saveGame(); renderCrafting();
+        showToast(`CHẾ TÁC THÀNH CÔNG:<br><span style="color:${crafted.c}; text-shadow: 0 0 5px ${crafted.c};">${crafted.n}</span>`, crafted.c);
     }
 
-    updateBalanceUI();
+    function renderBackpack() {
+        const container = document.getElementById('backpack-grid');
+        container.innerHTML = '';
+        let totalVal = 0; document.getElementById('bp-count').innerText = player.inventory.length;
+
+        player.inventory.forEach((item, index) => {
+            const livePrice = item.baseP * currentMultiplier;
+            totalVal += livePrice;
+            container.innerHTML += `
+                <div class="item-card" style="border-top: 3px solid ${item.c}; animation-delay: ${index > 10 ? 0 : index * 0.05}s;">
+                    <div class="item-name" style="color: ${item.c}">${item.n}</div>
+                    <div class="item-price">${livePrice.toFixed(2)}$</div>
+                    <button class="pixel-btn" style="margin-top:5px; padding: 5px; font-size:6px;" onclick="sellBackpackItem(${item.id})">BÁN</button>
+                </div>
+            `;
+        });
+        document.getElementById('bp-value').innerText = totalVal.toFixed(2) + '$';
+    }
+
+    function sellBackpackItem(id) {
+        const idx = player.inventory.findIndex(i => i.id === id);
+        if (idx > -1) {
+            const livePrice = player.inventory[idx].baseP * currentMultiplier;
+            player.balance += livePrice; player.inventory.splice(idx, 1);
+            saveGame(); renderBackpack(); showToast(`BÁN ĐƯỢC +${livePrice.toFixed(2)}$`, 'var(--up)');
+        }
+    }
+
+    function renderQuests() {
+        const container = document.getElementById('quest-container');
+        container.innerHTML = '';
+        questsDB.forEach((q, idx) => {
+            let isClaimed = player.questClaimed.includes(q.id);
+            let prog = Math.min((player.casesOpened / q.target) * 100, 100);
+            let btnHTML = isClaimed ? `<button class="pixel-btn" disabled style="font-size:7px; padding:6px;">ĐÃ NHẬN</button>` 
+                        : (player.casesOpened >= q.target ? `<button class="pixel-btn btn-claim" onclick="claimQuest('${q.id}', ${q.reward})">NHẬN ${q.reward}$</button>` 
+                        : `<div style="font-size:7px; color:#888;">${player.casesOpened}/${q.target}</div>`);
+
+            container.innerHTML += `
+                <div class="quest-card" style="animation-delay: ${idx * 0.1}s">
+                    <div class="quest-info">
+                        <div class="quest-title" style="${isClaimed ? 'color:#555' : ''}">${q.title}</div>
+                        <div style="width:100%; height:8px; background:#000; border:1px solid #555;"><div style="height:100%; background:${isClaimed ? '#555' : 'var(--up)'}; width:${prog}%"></div></div>
+                    </div>
+                    <div>${btnHTML}</div>
+                </div>
+            `;
+        });
+    }
+
+    function claimQuest(qid, reward) {
+        if (!player.questClaimed.includes(qid)) {
+            player.questClaimed.push(qid); player.balance += reward;
+            saveGame(); renderQuests(); showToast(`NHẬN THƯỞNG +${reward}$`, 'var(--up)');
+        }
+    }
+
+    function renderProfile() {
+        document.getElementById('prof-balance').innerText = player.balance.toFixed(2) + '$';
+        document.getElementById('prof-cases').innerText = player.casesOpened;
+        let invVal = player.inventory.reduce((sum, i) => sum + (i.baseP * currentMultiplier), 0);
+        document.getElementById('prof-inv-value').innerText = invVal.toFixed(2) + '$';
+    }
+
+    // --- MODAL ---
+    function openTradeModal(itemId) {
+        currentActiveTradeItem = marketItemsDB.find(i => i.id === itemId);
+        document.getElementById('modal-item-name').innerText = currentActiveTradeItem.n;
+        document.getElementById('modal-item-name').style.color = currentActiveTradeItem.c;
+        
+        const modal = document.getElementById('trade-modal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10); // Đợi display flex áp dụng trước khi chạy CSS Transition
+        
+        document.getElementById('btn-modal-buy').onclick = () => buyMarketItem(currentActiveTradeItem);
+        document.getElementById('btn-modal-sell').onclick = () => sellMarketItem(currentActiveTradeItem);
+
+        updateModalLivePrice();
+        const ctx = document.getElementById('itemChart').getContext('2d');
+        const itemHistory = marketHistory.map(m => m * currentActiveTradeItem.baseP);
+
+        if (modalChartInstance) modalChartInstance.destroy();
+        modalChartInstance = new Chart(ctx, {
+            type: 'line', data: { labels: Array(30).fill(''), datasets: [{ data: itemHistory, borderColor: currentActiveTradeItem.c, borderWidth: 2, stepped: true, pointRadius: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, scales: { x: { display: false }, y: { position: 'right', grid: { color: '#333' }, ticks: { font: { size: 7 } } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+        });
+    }
+
+    function closeModal() { 
+        const modal = document.getElementById('trade-modal');
+        modal.classList.remove('show');
+        setTimeout(() => { modal.style.display = 'none'; currentActiveTradeItem = null; }, 200); // Đợi CSS transition chạy xong mới ẩn DOM
+    }
+
+    function updateModalLivePrice() {
+        if(!currentActiveTradeItem) return;
+        const livePrice = currentActiveTradeItem.baseP * currentMultiplier;
+        document.getElementById('modal-item-price').innerText = livePrice.toFixed(2) + '$';
+        
+        if(modalChartInstance) {
+            const itemHistory = marketHistory.map(m => m * currentActiveTradeItem.baseP);
+            modalChartInstance.data.datasets[0].data = itemHistory;
+            modalChartInstance.data.datasets[0].borderColor = itemHistory[29] >= itemHistory[28] ? 'var(--up)' : 'var(--down)';
+            modalChartInstance.update();
+        }
+    }
+
+    function buyMarketItem(item) {
+        const livePrice = item.baseP * currentMultiplier;
+        if(player.balance >= livePrice) {
+            player.balance -= livePrice;
+            player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP, t: item.t });
+            saveGame(); showToast(`ĐÃ MUA:<br>${item.n}`, 'var(--up)');
+        } else { showToast('KHÔNG ĐỦ TIỀN MẶT!', 'var(--down)'); }
+    }
+
+    function sellMarketItem(item) {
+        const idx = player.inventory.findIndex(i => i.n === item.n);
+        if(idx > -1) {
+            const livePrice = player.inventory[idx].baseP * currentMultiplier;
+            player.balance += livePrice; player.inventory.splice(idx, 1);
+            saveGame(); showToast(`ĐÃ BÁN:<br>${item.n}`, 'var(--up)');
+        } else { showToast('BẠN CHƯA SỞ HỮU<br>MÓN ĐỒ NÀY!', 'var(--down)'); }
+    }
+
+    // INIT
+    updateHeaderBalance(); renderHome(); renderTradeMarket();
 </script>
 </body>
 </html>
