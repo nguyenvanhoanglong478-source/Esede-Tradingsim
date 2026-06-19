@@ -41,7 +41,6 @@
         .pixel-btn:active { transform: translate(2px, 2px); box-shadow: none; }
         .pixel-btn:disabled { background: #333; color: #777; border-color: #555; box-shadow: none; transform: none; cursor: not-allowed; }
 
-        /* HEADER & THANH XP */
         header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 2px dashed #444; background: var(--bg-panel); z-index: 10; }
         .header-title { font-size: 22px; color: var(--t5); animation: neonGlow 2s infinite; display: flex; gap: 10px; align-items: center;}
         .sound-icon { color: var(--primary); cursor: pointer; font-size: 18px; }
@@ -99,14 +98,31 @@
         .empty-state i { font-size: 60px; margin-bottom: 15px; opacity: 0.3; }
         .empty-state p { font-size: 18px; }
 
-        /* PROFILE */
+        /* HỒ SƠ & THÀNH TỰU MỚI */
         .profile-stat { border-bottom: 2px dashed #333; padding: 12px 0; display: flex; justify-content: space-between; font-size: 16px; }
         .record-stat { color: var(--t5); font-size: 14px; margin-top: 5px;}
 
+        .achievements-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;}
+        .achieve-card { background: #111; border: 1px dashed #444; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 5px; gap: 5px; transition: 0.3s;}
+        .achieve-icon { font-size: 24px; transition: 0.3s; }
+        .achieve-locked { filter: grayscale(1); opacity: 0.5; }
+        .achieve-locked .achieve-icon { color: #888 !important; text-shadow: none !important;}
+        .achieve-title { font-size: 12px; line-height: 1.2; color: #fff;}
+        .achieve-prog { font-size: 10px; color: #888;}
+
+        /* ĐIỂM DANH HÀNG NGÀY (DAILY LOGIN) */
+        .daily-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 15px; }
+        .daily-item { background: #111; border: 1px solid #444; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative;}
+        .daily-day { font-size: 12px; color: #888; }
+        .daily-reward { font-size: 14px; color: var(--up); }
+        .daily-today { border-color: var(--t5); background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); animation: popIn 0.3s;}
+        .daily-today .daily-day { color: var(--t5); font-weight: bold;}
+        .daily-claimed::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; font-size: 30px; color: rgba(57, 255, 20, 0.5); }
+        
         /* MODALS */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; z-index: 100; padding: 15px; justify-content: center; }
         .modal.show { display: flex; }
-        .modal-box { background: var(--bg-panel); border: 2px solid white; padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 80vh; overflow-y: auto;}
+        .modal-box { background: var(--bg-panel); border: 2px solid white; padding: 15px; display: flex; flex-direction: column; gap: 10px; max-height: 80vh; overflow-y: auto;}
         .modal-header { display: flex; justify-content: space-between; font-size: 18px; border-bottom: 2px dashed #555; padding-bottom: 10px; align-items: center;}
         .chart-wrapper { height: 220px; width: 100%; background: #000; border: 1px solid #333; padding: 5px; position: relative; }
 
@@ -131,10 +147,12 @@
         .nav-item i { font-size: 18px; transition: transform 0.2s; }
         .nav-item.active i { transform: scale(1.1); color: var(--up); text-shadow: 0 0 10px var(--up); }
 
-        /* TOAST LÊN CẤP */
         #toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 2500; display: flex; flex-direction: column; gap: 5px; width: 90%; pointer-events: none;}
         .toast { background: rgba(0,0,0,0.9); padding: 12px; font-size: 16px; text-align: center; border: 2px solid white; line-height: 1.5; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: opacity 0.2s; }
         .toast-levelup { font-size: 20px; color: var(--t5); text-shadow: 0 0 10px var(--t5); padding: 20px; border-color: var(--t5); background: rgba(0,0,0,0.95); font-weight: bold; animation: popIn 0.5s ease-out; }
+        /* Toast Thành tựu mới */
+        .toast-achievement { border-color: var(--t3); background: rgba(211, 44, 230, 0.15); box-shadow: inset 0 0 10px rgba(211,44,230,0.5); color: white;}
+        .toast-achievement i { color: var(--t5); margin-right: 5px;}
     </style>
 </head>
 <body>
@@ -211,18 +229,23 @@
         <div class="profile-stat"><span>SỐ DƯ HIỆN TẠI</span><span class="num-font" id="prof-balance" style="color: var(--up)">0$</span></div>
         <div class="profile-stat"><span>SỐ HÒM ĐÃ MỞ</span><span class="num-font" id="prof-cases">0</span></div>
         
-        <div style="margin-top: 20px; font-size: 20px; color: var(--t5); text-align: center;">🏆 KỶ LỤC CÁ NHÂN 🏆</div>
-        <div class="profile-stat" style="flex-direction: column;">
-            <div style="display:flex; justify-content: space-between;"><span>Tài sản đỉnh cao</span><span class="num-font" id="rec-balance">0$</span></div>
-        </div>
-        <div class="profile-stat" style="flex-direction: column;">
-            <div style="display:flex; justify-content: space-between;"><span>Kho đồ đắt nhất</span><span class="num-font" id="rec-inv">0$</span></div>
-        </div>
-        <div class="profile-stat" style="flex-direction: column;">
-            <div style="display:flex; justify-content: space-between;"><span>Vật phẩm xịn nhất</span><span class="num-font" id="rec-item-val" style="color:var(--up)">0$</span></div>
-            <div class="record-stat" id="rec-item-name">Chưa có</div>
-        </div>
+        <div class="quest-section-title" style="text-align: center; margin-top: 30px;">🏆 THÀNH TỰU 🏆</div>
+        <div class="achievements-grid" id="achievements-grid"></div>
+
+        <div class="quest-section-title" style="text-align: center; margin-top: 30px;">⭐ KỶ LỤC CÁ NHÂN ⭐</div>
+        <div class="profile-stat" style="flex-direction: column;"><div style="display:flex; justify-content: space-between;"><span>Tài sản đỉnh cao</span><span class="num-font" id="rec-balance">0$</span></div></div>
+        <div class="profile-stat" style="flex-direction: column;"><div style="display:flex; justify-content: space-between;"><span>Kho đồ đắt nhất</span><span class="num-font" id="rec-inv">0$</span></div></div>
+        <div class="profile-stat" style="flex-direction: column;"><div style="display:flex; justify-content: space-between;"><span>Vật phẩm xịn nhất</span><span class="num-font" id="rec-item-val" style="color:var(--up)">0$</span></div><div class="record-stat" id="rec-item-name">Chưa có</div></div>
         <button class="pixel-btn" style="width: 100%; margin-top: 30px; border-color: var(--down); color: var(--down);" onclick="resetGame()">XÓA DỮ LIỆU</button>
+    </div>
+
+    <div class="modal" id="daily-login-modal">
+        <div class="modal-box" style="text-align: center;">
+            <div class="modal-header" style="justify-content: center;"><span style="color:var(--t5);">🎁 ĐIỂM DANH HÀNG NGÀY 🎁</span></div>
+            <div style="font-size: 14px; color: #aaa;">Đăng nhập mỗi ngày để nhận thưởng!</div>
+            <div class="daily-grid" id="daily-login-grid"></div>
+            <button class="pixel-btn" style="margin-top: 15px; background: var(--up); color: #000;" onclick="claimDailyLogin()">NHẬN THƯỞNG</button>
+        </div>
     </div>
 
     <div class="modal" id="rates-modal">
@@ -284,99 +307,39 @@
     </nav>
 
 <script>
-    function hexToRgba(hex, alpha) {
-        let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
-        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-    }
-
+    function hexToRgba(hex, alpha) { let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16); return `rgba(${r}, ${g}, ${b}, ${alpha})`; }
     function updatePriceWithFX(el, newPrice) {
-        if (!el) return;
-        let oldPrice = parseFloat(el.getAttribute('data-price') || newPrice);
+        if (!el) return; let oldPrice = parseFloat(el.getAttribute('data-price') || newPrice);
         if (newPrice !== oldPrice) {
-            let isUp = newPrice > oldPrice;
-            el.classList.remove('price-up', 'price-down');
-            void el.offsetWidth; 
-            el.classList.add(isUp ? 'price-up' : 'price-down');
-            el.innerHTML = `${newPrice.toFixed(2)}$ <span style="font-size:0.8em">${isUp ? '▲' : '▼'}</span>`;
-            el.setAttribute('data-price', newPrice);
+            let isUp = newPrice > oldPrice; el.classList.remove('price-up', 'price-down'); void el.offsetWidth; 
+            el.classList.add(isUp ? 'price-up' : 'price-down'); el.innerHTML = `${newPrice.toFixed(2)}$ <span style="font-size:0.8em">${isUp ? '▲' : '▼'}</span>`; el.setAttribute('data-price', newPrice);
             setTimeout(() => el.classList.remove('price-up', 'price-down'), 400);
-        } else if(!el.innerHTML.includes('▲') && !el.innerHTML.includes('▼')) {
-            el.innerHTML = `${newPrice.toFixed(2)}$`;
-            el.setAttribute('data-price', newPrice);
-        }
+        } else if(!el.innerHTML.includes('▲') && !el.innerHTML.includes('▼')) { el.innerHTML = `${newPrice.toFixed(2)}$`; el.setAttribute('data-price', newPrice); }
     }
 
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
     const AudioContext = window.AudioContext || window.webkitAudioContext; const audioCtx = new AudioContext();
-    function playTone(freq, type, duration, vol = 0.1) {
-        if(player.soundMuted) return;
-        if(audioCtx.state === 'suspended') audioCtx.resume();
-        let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
-        osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration);
-    }
-    function playTick() { playTone(800, 'sine', 0.05, 0.05); }
-    function playStop() { playTone(300, 'square', 0.2, 0.1); }
-    function playEpic() { playTone(440, 'sawtooth', 1.5, 0.1); playTone(554, 'sawtooth', 1.5, 0.1); playTone(659, 'sawtooth', 1.5, 0.1); }
+    function playTone(freq, type, duration, vol = 0.1) { if(player.soundMuted) return; if(audioCtx.state === 'suspended') audioCtx.resume(); let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration); }
+    function playTick() { playTone(800, 'sine', 0.05, 0.05); } function playStop() { playTone(300, 'square', 0.2, 0.1); } function playEpic() { playTone(440, 'sawtooth', 1.5, 0.1); playTone(554, 'sawtooth', 1.5, 0.1); playTone(659, 'sawtooth', 1.5, 0.1); }
     function toggleSound() { player.soundMuted = !player.soundMuted; saveGame(); updateSoundIcon(); }
     function updateSoundIcon() { document.getElementById('sound-icon').className = player.soundMuted ? "fa-solid fa-volume-xmark sound-icon" : "fa-solid fa-volume-high sound-icon"; document.getElementById('sound-icon').style.color = player.soundMuted ? "#555" : "var(--primary)"; }
 
-    // --- HỆ THỐNG CẤP ĐỘ (LEVEL/XP) ---
+    // --- HỆ THỐNG CẤP ĐỘ ---
     function xpForLevel(level) { return Math.floor(80 * Math.pow(level, 1.4)); }
-    function getRankName(level) {
-        if(level <= 4) return "Tập Sự";
-        if(level <= 9) return "Thợ Săn Hòm";
-        if(level <= 19) return "Nhà Giao Dịch";
-        if(level <= 29) return "Thương Gia";
-        if(level <= 49) return "Đại Gia";
-        return "Huyền Thoại";
-    }
-    
-    function onLevelUp() {
-        let reward = player.level * 50;
-        player.balance += reward;
-        playEpic();
-        showToast(`🎉 LÊN CẤP ${player.level}! +${reward}$`, 'var(--t5)', true);
-    }
-
-    function addXP(amount) {
-        player.xp += amount;
-        let leveledUp = false;
-        while(player.xp >= xpForLevel(player.level)) {
-            player.xp -= xpForLevel(player.level);
-            player.level++;
-            leveledUp = true;
-            onLevelUp();
-        }
-        saveGame();
-        updateLevelUI();
-    }
-
+    function getRankName(level) { if(level <= 4) return "Tập Sự"; if(level <= 9) return "Thợ Săn Hòm"; if(level <= 19) return "Nhà Giao Dịch"; if(level <= 29) return "Thương Gia"; if(level <= 49) return "Đại Gia"; return "Huyền Thoại"; }
+    function onLevelUp() { let reward = player.level * 50; player.balance += reward; playEpic(); showToast(`🎉 LÊN CẤP ${player.level}! +${reward}$`, 'var(--t5)', true); }
+    function addXP(amount) { player.xp += amount; let leveledUp = false; while(player.xp >= xpForLevel(player.level)) { player.xp -= xpForLevel(player.level); player.level++; leveledUp = true; onLevelUp(); } saveGame(); updateLevelUI(); }
     function updateLevelUI() {
-        let rank = getRankName(player.level);
-        let req = xpForLevel(player.level);
-        let pct = Math.min((player.xp / req) * 100, 100);
-
+        let rank = getRankName(player.level); let req = xpForLevel(player.level); let pct = Math.min((player.xp / req) * 100, 100);
         let hl = document.getElementById('header-level'); if(hl) hl.innerText = `Lv.${player.level} - ${rank}`;
         let hf = document.getElementById('header-xp-fill'); if(hf) hf.style.width = pct + '%';
-        
         let pl = document.getElementById('prof-level-text'); if(pl) pl.innerText = `Lv.${player.level} - ${rank}`;
         let pf = document.getElementById('prof-xp-fill'); if(pf) pf.style.width = pct + '%';
         let pt = document.getElementById('prof-xp-text'); if(pt) pt.innerText = `${Math.floor(player.xp)} / ${req} XP`;
     }
 
-    function getPityAdjustedPool(basePool, pityCount) {
-        if (pityCount < 50) return basePool;
-        let boost = (pityCount - 50) * 0.15; 
-        return basePool.map(item => { if (item.t >= 4) return { ...item, w: item.w + boost }; return item; });
-    }
-    function weightedPick(pool) {
-        const total = pool.reduce((sum, p) => sum + p.w, 0);
-        let rand = Math.random() * total, cum = 0;
-        for (const p of pool) { cum += p.w; if (rand <= cum) return p; }
-        return pool[pool.length - 1];
-    }
+    function getPityAdjustedPool(basePool, pityCount) { if (pityCount < 50) return basePool; let boost = (pityCount - 50) * 0.15; return basePool.map(item => { if (item.t >= 4) return { ...item, w: item.w + boost }; return item; }); }
+    function weightedPick(pool) { const total = pool.reduce((sum, p) => sum + p.w, 0); let rand = Math.random() * total, cum = 0; for (const p of pool) { cum += p.w; if (rand <= cum) return p; } return pool[pool.length - 1]; }
     function weightedPickPity(pool, pityCount) { return weightedPick(getPityAdjustedPool(pool, pityCount)); }
 
     const tColors = {1:"#4b69ff", 2:"#8847ff", 3:"#d32ce6", 4:"#eb4b4b", 5:"#ffd700"};
@@ -401,32 +364,137 @@
         return { id: 'c' + i, name: 'HÒM ' + name.toUpperCase(), price: price, color: (i % 2 === 0 ? '#aaa' : '#fff'), pool: pool };
     });
     const marketItemsDB = rawItems.map(item => ({ id: 'item_' + item.n.replace(/\s/g, ''), n: item.n, c: tColors[item.t], baseP: item.p, t: item.t, multiplier: 1.0, volatility: (Math.random() * 0.04) + 0.01 }));
+    
     const questsDB = [
         { id: 'q1', type: 'once', cond: 'cases', title: 'Mở 20 hòm', target: 20, reward: 1500 }, { id: 'q2', type: 'once', cond: 'balance', title: 'Đạt số dư 50,000$', target: 50000, reward: 5000 }, { id: 'q3', type: 'once', cond: 'covert', title: 'Mở trúng 1 đồ Đỏ/Vàng', target: 1, reward: 10000 },
         { id: 'd1', type: 'daily', cond: 'cases', title: 'Hằng Ngày: Mở 5 hòm', target: 5, reward: 500 }, { id: 'd2', type: 'daily', cond: 'sell', title: 'Hằng Ngày: Bán 10 vật phẩm', target: 10, reward: 800 }, { id: 'd3', type: 'daily', cond: 'highcase', title: 'Hằng Ngày: Mở 1 hòm > 500$', target: 1, reward: 2000 }
     ];
 
+    // --- CƠ SỞ DỮ LIỆU THÀNH TỰU ---
+    const achievementsDB = [
+        { id: 'a1', title: 'Hòm đầu tay', desc: 'Mở 1 hòm', icon: 'fa-box', cond: 'cases', target: 1, xpReward: 50, cashReward: 100, color: '#aaa' },
+        { id: 'a2', title: 'Tay mơ', desc: 'Mở 10 hòm', icon: 'fa-boxes-stacked', cond: 'cases', target: 10, xpReward: 100, cashReward: 300, color: 'var(--t1)' },
+        { id: 'a3', title: 'Chuyên gia mở hòm', desc: 'Mở 100 hòm', icon: 'fa-crown', cond: 'cases', target: 100, xpReward: 500, cashReward: 2000, color: 'var(--t3)' },
+        { id: 'a4', title: 'Triệu phú', desc: 'Đạt số dư 1M$', icon: 'fa-sack-dollar', cond: 'balance', target: 1000000, xpReward: 1000, cashReward: 0, color: 'var(--up)' },
+        { id: 'a5', title: 'Săn đồ hiếm', desc: 'Nhận 1 item Đỏ', icon: 'fa-fire', cond: 't4', target: 1, xpReward: 300, cashReward: 1000, color: 'var(--t4)' },
+        { id: 'a6', title: 'Huyền thoại', desc: 'Nhận 1 item Vàng', icon: 'fa-gem', cond: 't5', target: 1, xpReward: 1000, cashReward: 5000, color: 'var(--t5)' },
+        { id: 'a7', title: 'Nhà giao dịch', desc: 'Mua/bán 50 lần', icon: 'fa-chart-line', cond: 'market', target: 50, xpReward: 400, cashReward: 1500, color: 'var(--t2)' },
+        { id: 'a8', title: 'Kiên trì', desc: 'Đăng nhập 7 ngày', icon: 'fa-calendar-check', cond: 'streak', target: 7, xpReward: 700, cashReward: 3000, color: '#00e5ff' }
+    ];
+
     let defaultPlayer = { 
         balance: 10000.00, casesOpened: 0, inventory: [], questClaimed: [], pityCounter: {}, soundMuted: false, history: [], 
         records: { maxBalance: 10000, maxInvValue: 0, bestItemName: "", bestItemValue: 0, maxCaseOpened: 0 }, 
-        stats: { sell: 0, covert: 0 }, dailyStats: { cases: 0, sell: 0, covert: 0, highcase: 0 }, lastDailyReset: "",
-        level: 1, xp: 0
+        stats: { sell: 0, buy: 0, covert: 0, t4: 0, t5: 0 }, dailyStats: { cases: 0, sell: 0, covert: 0, highcase: 0 }, lastDailyReset: "",
+        level: 1, xp: 0,
+        achievementsUnlocked: [], loginStreak: { count: 0, lastDate: null }
     };
     let player = JSON.parse(localStorage.getItem('pixelGachaX')) || defaultPlayer;
-    if(!player.stats) player.stats = { sell: 0, covert: 0 }; if(!player.dailyStats) player.dailyStats = { cases: 0, sell: 0, covert: 0, highcase: 0 };
-    if(player.level === undefined) player.level = 1; if(player.xp === undefined) player.xp = 0;
     
-    const todayStr = new Date().toDateString();
+    // Auto Patching dữ liệu cũ
+    if(!player.stats) player.stats = { sell: 0, buy: 0, covert: 0, t4: 0, t5: 0 };
+    if(player.stats.buy === undefined) player.stats.buy = 0; if(player.stats.t4 === undefined) player.stats.t4 = 0; if(player.stats.t5 === undefined) player.stats.t5 = 0;
+    if(!player.dailyStats) player.dailyStats = { cases: 0, sell: 0, covert: 0, highcase: 0 };
+    if(player.level === undefined) player.level = 1; if(player.xp === undefined) player.xp = 0;
+    if(!player.achievementsUnlocked) player.achievementsUnlocked = [];
+    if(!player.loginStreak) player.loginStreak = { count: 0, lastDate: null };
+    
+    // Reset Daily Quests
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
     if(player.lastDailyReset !== todayStr) { player.dailyStats = { cases: 0, sell: 0, covert: 0, highcase: 0 }; const dailyIds = questsDB.filter(q => q.type === 'daily').map(q => q.id); player.questClaimed = player.questClaimed.filter(id => !dailyIds.includes(id)); player.lastDailyReset = todayStr; saveGame(); }
 
     function saveGame() { localStorage.setItem('pixelGachaX', JSON.stringify(player)); updateHeaderBalance(); }
     function resetGame() { if(confirm("Xóa dữ liệu chơi?")) { localStorage.removeItem('pixelGachaX'); location.reload(); } }
+
+    // --- HỆ THỐNG THÀNH TỰU ---
+    function getAchievementProgress(cond) {
+        if(cond === 'cases') return player.casesOpened;
+        if(cond === 'balance') return player.balance;
+        if(cond === 't4') return player.stats.t4;
+        if(cond === 't5') return player.stats.t5;
+        if(cond === 'market') return player.stats.buy + player.stats.sell;
+        if(cond === 'streak') return player.loginStreak.count;
+        return 0;
+    }
+
+    function checkAchievements() {
+        let changed = false;
+        achievementsDB.forEach(a => {
+            if(!player.achievementsUnlocked.includes(a.id)) {
+                if(getAchievementProgress(a.cond) >= a.target) {
+                    player.achievementsUnlocked.push(a.id);
+                    player.balance += a.cashReward;
+                    addXP(a.xpReward);
+                    showToast(`<i class="fa-solid ${a.icon}"></i> THÀNH TỰU: ${a.title}`, a.color, false, true);
+                    changed = true;
+                }
+            }
+        });
+        if(changed) { saveGame(); if(document.getElementById('screen-profile').classList.contains('active')) renderProfile(); }
+    }
+
+    function showToast(msg, color = 'white', isLevelUp = false, isAchievement = false) { 
+        const c = document.getElementById('toast-container'); const t = document.createElement('div'); 
+        t.className = isLevelUp ? 'toast toast-levelup' : (isAchievement ? 'toast toast-achievement' : 'toast'); 
+        t.style.borderColor = color; t.innerHTML = msg; c.appendChild(t); 
+        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, isLevelUp || isAchievement ? 3000 : 2000); 
+    }
+
+    // --- HỆ THỐNG ĐIỂM DANH (LOGIN STREAK) ---
+    function getDaysDiff(date1Str, date2Str) {
+        if(!date1Str) return 999;
+        const d1 = new Date(date1Str); const d2 = new Date(date2Str);
+        return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+    }
+
+    const dailyRewards = [50, 100, 150, 250, 400, 600, 1000];
+    function checkDailyLogin() {
+        let diff = getDaysDiff(player.loginStreak.lastDate, todayStr);
+        if(diff === 0) return; // Đã nhận hôm nay
+        
+        if(diff === 1) player.loginStreak.count++; 
+        else player.loginStreak.count = 1; // Mất chuỗi hoặc lần đầu
+        
+        let cycleIndex = (player.loginStreak.count - 1) % 7;
+        
+        // Hiện Modal
+        const grid = document.getElementById('daily-login-grid'); grid.innerHTML = '';
+        for(let i=0; i<7; i++) {
+            let statusClass = "";
+            if(i < cycleIndex) statusClass = "daily-claimed";
+            else if (i === cycleIndex) statusClass = "daily-today";
+            
+            grid.innerHTML += `
+                <div class="daily-item ${statusClass}">
+                    <div class="daily-day">Ngày ${i+1}</div>
+                    <div class="daily-reward num-font">${dailyRewards[i]}$</div>
+                </div>
+            `;
+        }
+        document.getElementById('daily-login-modal').style.display = 'flex';
+    }
+
+    function claimDailyLogin() {
+        let cycleIndex = (player.loginStreak.count - 1) % 7;
+        let reward = dailyRewards[cycleIndex];
+        player.balance += reward;
+        player.loginStreak.lastDate = todayStr;
+        saveGame();
+        checkAchievements();
+        document.getElementById('daily-login-modal').style.display = 'none';
+        showToast(`ĐIỂM DANH: +${reward}$`, cUP);
+    }
+
+    // Chạy check login khi vừa load trang
+    window.addEventListener('load', () => { checkDailyLogin(); });
+
+    // --- MARKET ENGINE ---
     function addHistory(caseName, itemName, color, value) { let now = new Date(); let timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} - ${now.getDate()}/${now.getMonth()+1}`; player.history.unshift({time: timeStr, cName: caseName, iName: itemName, color: color, val: value}); if(player.history.length > 100) player.history.pop(); }
-    function checkRecordsBalance() { if(player.balance > player.records.maxBalance) { player.records.maxBalance = player.balance; } let invVal = player.inventory.reduce((sum, i) => sum + (i.baseP * marketItemsDB.find(m=>m.n===i.n).multiplier), 0); if(invVal > player.records.maxInvValue) player.records.maxInvValue = invVal; }
+    function checkRecordsBalance() { if(player.balance > player.records.maxBalance) { player.records.maxBalance = player.balance; } let invVal = player.inventory.reduce((sum, i) => sum + (i.baseP * marketItemsDB.find(m=>m.n===i.n).multiplier), 0); if(invVal > player.records.maxInvValue) player.records.maxInvValue = invVal; checkAchievements(); }
 
     let marketHistory = {}; marketItemsDB.forEach(item => { marketHistory[item.n] = Array(30).fill(1.0); });
     for(let i=0; i<30; i++) { marketItemsDB.forEach(item => { item.multiplier *= (1 + ((Math.random() * (item.volatility * 2)) - item.volatility)); if (item.multiplier < 0.1) item.multiplier = 0.1; marketHistory[item.n].push(item.multiplier); marketHistory[item.n].shift(); }); }
-
     setInterval(() => {
         marketItemsDB.forEach(item => { let change = (Math.random() * (item.volatility * 2)) - item.volatility; item.multiplier *= (1 + change); if (item.multiplier < 0.1) item.multiplier = 0.1; marketHistory[item.n].push(item.multiplier); marketHistory[item.n].shift(); });
         if(document.getElementById('screen-trade').classList.contains('active')) updateTradePrices();
@@ -436,6 +504,7 @@
 
     function getLivePrice(itemName, baseP) { let mItem = marketItemsDB.find(m => m.n === itemName); return mItem ? baseP * mItem.multiplier : baseP; }
 
+    // --- GIAO DIỆN CHUNG ---
     function switchTab(tabId) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); event.currentTarget.classList.add('active');
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(`screen-${tabId}`).classList.add('active');
@@ -444,37 +513,18 @@
         if (tabId === 'backpack') renderBackpack(); if (tabId === 'history') renderHistory(); if (tabId === 'quest') renderQuests(); if (tabId === 'profile') renderProfile();
     }
 
-    // THAY ĐỔI: Nhận thêm class toast-levelup cho glow đặc biệt
-    function showToast(msg, color = 'white', isLevelUp = false) { 
-        const c = document.getElementById('toast-container'); const t = document.createElement('div'); 
-        t.className = isLevelUp ? 'toast toast-levelup' : 'toast'; 
-        t.style.borderColor = color; t.innerHTML = msg; c.appendChild(t); 
-        setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, isLevelUp ? 3000 : 2000); 
-    }
-    
     function updateHeaderBalance() { const balEl = document.getElementById('header-balance'); updatePriceWithFX(balEl, player.balance); checkRecordsBalance(); checkQuestsSilent(); }
 
     function renderHome() {
         const container = document.getElementById('case-container'); container.innerHTML = '';
         casesDB.forEach(c => {
-            let totalWeight = c.pool.reduce((s, p) => s + p.w, 0);
-            let barHtml = ''; let maxTier = 1;
+            let totalWeight = c.pool.reduce((s, p) => s + p.w, 0); let barHtml = ''; let maxTier = 1;
             [...c.pool].sort((a,b) => a.t - b.t).forEach(p => { 
-                let pct = (p.w / totalWeight * 100); 
-                barHtml += `<div class="case-bar-segment" style="width: ${pct}%; background: ${p.c};" title="Tier ${p.t}: ${pct.toFixed(1)}%"></div>`;
+                let pct = (p.w / totalWeight * 100); barHtml += `<div class="case-bar-segment" style="width: ${pct}%; background: ${p.c};" title="Tier ${p.t}: ${pct.toFixed(1)}%"></div>`;
                 if(p.t > maxTier) maxTier = p.t;
             });
             let iconClass = maxTier >= 5 ? 'fa-crown' : (maxTier >= 4 ? 'fa-gem' : 'fa-box');
-
-            container.innerHTML += `
-                <div class="case-card" id="card-${c.id}" style="border-color: ${c.color}">
-                    <i class="fa-solid ${iconClass} case-tier-icon" style="color: ${tColors[maxTier]}"></i>
-                    <div class="case-title" style="color: ${c.color}">${c.name}</div>
-                    <div class="case-price-tag num-font">Giá: ${c.price}$</div>
-                    <div class="case-bar-container">${barHtml}</div>
-                    <div class="case-actions"><button class="pixel-btn btn-rate" onclick="openRatesModal('${c.id}')">TỈ LỆ</button><button class="pixel-btn btn-x1" onclick="startGacha('${c.id}', 1)">MỞ x1</button><button class="pixel-btn btn-x10" onclick="startGacha('${c.id}', 10)">MỞ x10</button></div>
-                </div>
-            `;
+            container.innerHTML += `<div class="case-card" id="card-${c.id}" style="border-color: ${c.color}"><i class="fa-solid ${iconClass} case-tier-icon" style="color: ${tColors[maxTier]}"></i><div class="case-title" style="color: ${c.color}">${c.name}</div><div class="case-price-tag num-font">Giá: ${c.price}$</div><div class="case-bar-container">${barHtml}</div><div class="case-actions"><button class="pixel-btn btn-rate" onclick="openRatesModal('${c.id}')">TỈ LỆ</button><button class="pixel-btn btn-x1" onclick="startGacha('${c.id}', 1)">MỞ x1</button><button class="pixel-btn btn-x10" onclick="startGacha('${c.id}', 10)">MỞ x10</button></div></div>`;
         });
     }
 
@@ -509,16 +559,12 @@
 
             const modal = document.getElementById('gacha-modal'); const strip = document.getElementById('roller-strip'); const btnSkip = document.getElementById('btn-skip-gacha'); const btnClose = document.getElementById('btn-close-gacha'); const title = document.getElementById('gacha-title');
             title.className = "gacha-title"; modal.style.boxShadow = "none"; document.getElementById('gacha-roller').style.borderColor = "#333";
-
             document.getElementById('gacha-roller').style.display = 'flex'; document.getElementById('x10-result-grid').style.display = 'none';
             title.innerText = amount === 1 ? "ĐANG QUAY..." : "ĐANG QUAY x10..."; title.style.color = "white"; title.style.textShadow = "none";
             btnSkip.style.display = 'block'; btnClose.style.display = 'none'; strip.style.transition = 'none'; strip.style.transform = 'translateX(0)';
 
             let html = ''; const winningIndex = 50; const itemWidth = 110; 
-            for(let i=0; i<60; i++) { 
-                let temp = (i === winningIndex) ? highestItem : weightedPickPity(c.pool, pCount); 
-                html += `<div class="roller-item" style="border-color: ${temp.c}; color: ${temp.c}; background: linear-gradient(180deg, transparent 0%, ${hexToRgba(temp.c, 0.15)} 100%);">${temp.n}</div>`; 
-            }
+            for(let i=0; i<60; i++) { let temp = (i === winningIndex) ? highestItem : weightedPickPity(c.pool, pCount); html += `<div class="roller-item" style="border-color: ${temp.c}; color: ${temp.c}; background: linear-gradient(180deg, transparent 0%, ${hexToRgba(temp.c, 0.15)} 100%);">${temp.n}</div>`; }
             strip.innerHTML = html; modal.style.display = 'flex';
 
             setTimeout(() => {
@@ -538,19 +584,18 @@
 
         let hasEpic = pulledResults.some(item => item.t >= 4); if(hasEpic) playEpic(); else playStop();
 
-        let totalLiveVal = 0; let highestTier = 1;
-        let totalXP = 0; const xpMap = {1:5, 2:15, 3:40, 4:120, 5:400};
+        let totalLiveVal = 0; let highestTier = 1; let totalXP = 0; const xpMap = {1:5, 2:15, 3:40, 4:120, 5:400};
 
         pulledResults.forEach(item => {
             player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.p, t: item.t });
             let liveVal = getLivePrice(item.n, item.p); totalLiveVal += liveVal; addHistory(c.name, item.n, item.c, liveVal);
             if(liveVal > player.records.bestItemValue) { player.records.bestItemValue = liveVal; player.records.bestItemName = item.n; showToast(`KỶ LỤC MỚI: Item ${item.n} (${liveVal.toFixed(0)}$)`, 'var(--t5)'); }
             if(item.t > highestTier) highestTier = item.t;
-            totalXP += xpMap[item.t] || 0; // CỘNG DỒN XP CHO MỞ HÒM
+            if(item.t === 4) player.stats.t4++; if(item.t === 5) player.stats.t5++; // Ghi nhận cho Thành tựu
+            totalXP += xpMap[item.t] || 0; 
         });
         
-        addXP(totalXP); // Gọi hàm cộng XP hệ thống
-        saveGame(); checkQuestsSilent();
+        addXP(totalXP); saveGame(); checkQuestsSilent(); checkAchievements();
 
         if(highestTier === 4) { title.classList.add('glow-epic-4'); modal.style.boxShadow = "inset 0 0 50px var(--t4)"; document.getElementById('gacha-roller').style.borderColor = "var(--t4)";}
         if(highestTier === 5) { title.classList.add('glow-epic-5'); modal.style.boxShadow = "inset 0 0 100px var(--t5)"; document.getElementById('gacha-roller').style.borderColor = "var(--t5)";}
@@ -592,14 +637,11 @@
 
     let pendingSellIds = [];
     function renderBackpack() {
-        let sortMode = document.getElementById('bp-sort').value;
-        let sortedInv = [...player.inventory];
+        let sortMode = document.getElementById('bp-sort').value; let sortedInv = [...player.inventory];
         if (sortMode === 'price-desc') sortedInv.sort((a,b) => getLivePrice(b.n, b.baseP) - getLivePrice(a.n, a.baseP));
         if (sortMode === 'tier-desc') sortedInv.sort((a,b) => b.t - a.t);
 
-        const container = document.getElementById('backpack-grid'); container.innerHTML = '';
-        document.getElementById('bp-count').innerText = player.inventory.length;
-        
+        const container = document.getElementById('backpack-grid'); container.innerHTML = ''; document.getElementById('bp-count').innerText = player.inventory.length;
         if(sortedInv.length === 0) { container.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><i class="fa-solid fa-box-open"></i><p>Kho đồ trống</p></div>`; document.getElementById('bp-value').innerText = "0.00$"; return; }
 
         sortedInv.forEach(item => {
@@ -620,9 +662,7 @@
         if (idx > -1) { 
             const livePrice = getLivePrice(player.inventory[idx].n, player.inventory[idx].baseP); 
             player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; 
-            player.inventory.splice(idx, 1); 
-            addXP(2); // CỘNG XP KHI BÁN ITEM
-            saveGame(); renderBackpack(); showToast(`ĐÃ BÁN +${livePrice.toFixed(2)}$`, cUP); checkQuestsSilent(); 
+            player.inventory.splice(idx, 1); addXP(2); saveGame(); renderBackpack(); showToast(`ĐÃ BÁN +${livePrice.toFixed(2)}$`, cUP); checkQuestsSilent(); checkAchievements();
         }
     }
 
@@ -636,9 +676,8 @@
     function confirmSell() {
         let totalEarned = 0; let itemsSold = 0;
         player.inventory = player.inventory.filter(item => { if(pendingSellIds.includes(item.id)) { totalEarned += getLivePrice(item.n, item.baseP); itemsSold++; return false; } return true; });
-        player.balance += totalEarned; player.stats.sell += itemsSold; player.dailyStats.sell += itemsSold; 
-        addXP(itemsSold * 2); // CỘNG XP KHI BÁN HÀNG LOẠT
-        saveGame(); document.getElementById('sell-confirm-modal').style.display = 'none'; renderBackpack(); showToast(`ĐÃ BÁN: +${totalEarned.toFixed(2)}$`, cUP); checkQuestsSilent();
+        player.balance += totalEarned; player.stats.sell += itemsSold; player.dailyStats.sell += itemsSold; addXP(itemsSold * 2); 
+        saveGame(); document.getElementById('sell-confirm-modal').style.display = 'none'; renderBackpack(); showToast(`ĐÃ BÁN: +${totalEarned.toFixed(2)}$`, cUP); checkQuestsSilent(); checkAchievements();
     }
     function closeSellModal() { document.getElementById('sell-confirm-modal').style.display = 'none'; }
 
@@ -665,20 +704,30 @@
             if(q.type === 'daily') dailyContainer.innerHTML += html; else onceContainer.innerHTML += html;
         });
     }
-
-    function claimQuest(qid, reward) { 
-        if (!player.questClaimed.includes(qid)) { 
-            player.questClaimed.push(qid); player.balance += reward; 
-            addXP(Math.floor(reward * 0.3)); // CỘNG XP TỪ REWARD NHIỆM VỤ
-            saveGame(); renderQuests(); showToast(`NHẬN THƯỞNG +${reward}$`, cUP); 
-        } 
-    }
+    function claimQuest(qid, reward) { if (!player.questClaimed.includes(qid)) { player.questClaimed.push(qid); player.balance += reward; addXP(Math.floor(reward * 0.3)); saveGame(); renderQuests(); showToast(`NHẬN THƯỞNG +${reward}$`, cUP); checkAchievements(); } }
 
     function renderProfile() {
         document.getElementById('prof-balance').innerText = player.balance.toFixed(2) + '$'; document.getElementById('prof-cases').innerText = player.casesOpened;
         let invVal = player.inventory.reduce((sum, i) => sum + getLivePrice(i.n, i.baseP), 0); document.getElementById('prof-inv-value').innerText = invVal.toFixed(2) + '$';
         document.getElementById('rec-balance').innerText = player.records.maxBalance.toFixed(2) + '$'; document.getElementById('rec-inv').innerText = player.records.maxInvValue.toFixed(2) + '$';
         document.getElementById('rec-item-val').innerText = player.records.bestItemValue.toFixed(2) + '$'; document.getElementById('rec-item-name').innerText = player.records.bestItemName || "Chưa có";
+        
+        // Render Achievements Grid
+        const grid = document.getElementById('achievements-grid'); grid.innerHTML = '';
+        achievementsDB.forEach(a => {
+            let isUnlocked = player.achievementsUnlocked.includes(a.id);
+            let prog = Math.min(getAchievementProgress(a.cond), a.target);
+            let classLocked = isUnlocked ? "" : "achieve-locked";
+            let progText = isUnlocked ? "ĐÃ ĐẠT" : `${Math.floor(prog)}/${a.target}`;
+            
+            grid.innerHTML += `
+                <div class="achieve-card ${classLocked}" style="${isUnlocked ? `border-color:${a.color}; box-shadow: inset 0 0 10px ${hexToRgba(a.color,0.3)};` : ''}">
+                    <i class="fa-solid ${a.icon} achieve-icon" style="color: ${a.color}; text-shadow: 0 0 5px ${a.color};"></i>
+                    <div class="achieve-title">${a.title}</div>
+                    <div class="achieve-prog num-font">${progText}</div>
+                </div>
+            `;
+        });
     }
 
     Chart.defaults.font.family = "'Share Tech Mono', monospace"; Chart.defaults.color = "#aaaaaa";
@@ -709,10 +758,8 @@
     function buyMarketItem(item) {
         const livePrice = item.baseP * item.multiplier;
         if(player.balance >= livePrice) { 
-            player.balance -= livePrice; 
-            player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP, t: item.t }); 
-            addXP(2); // CỘNG XP MUA
-            saveGame(); showToast(`ĐÃ MUA:<br>${item.n}`, cUP); checkQuestsSilent(); 
+            player.balance -= livePrice; player.stats.buy++; player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP, t: item.t }); 
+            addXP(2); saveGame(); showToast(`ĐÃ MUA:<br>${item.n}`, cUP); checkQuestsSilent(); checkAchievements();
         } else { showToast('KHÔNG ĐỦ TIỀN MẶT!', cDOWN); }
     }
 
@@ -720,10 +767,8 @@
         const idx = player.inventory.findIndex(i => i.n === item.n);
         if(idx > -1) { 
             const livePrice = getLivePrice(player.inventory[idx].n, player.inventory[idx].baseP); 
-            player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; 
-            player.inventory.splice(idx, 1); 
-            addXP(2); // CỘNG XP BÁN
-            saveGame(); showToast(`ĐÃ BÁN:<br>${item.n}`, cUP); checkQuestsSilent();
+            player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; player.inventory.splice(idx, 1); 
+            addXP(2); saveGame(); showToast(`ĐÃ BÁN:<br>${item.n}`, cUP); checkQuestsSilent(); checkAchievements();
         } else { showToast('BẠN CHƯA CÓ<br>MÓN ĐỒ NÀY!', cDOWN); }
     }
 
