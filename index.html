@@ -154,6 +154,17 @@
     </nav>
 
 <script>
+    // --- HÀM RANDOM CÓ TRỌNG SỐ ---
+    function weightedPick(pool) {
+        const total = pool.reduce((sum, p) => sum + p.w, 0);
+        let rand = Math.random() * total, cum = 0;
+        for (const p of pool) {
+            cum += p.w;
+            if (rand <= cum) return p;
+        }
+        return pool[pool.length - 1];
+    }
+
     // --- CẤU HÌNH BIẾN MÀU & DATABASE ---
     const tColors = {1:"#4b69ff", 2:"#8847ff", 3:"#d32ce6", 4:"#eb4b4b", 5:"#ffd700"};
     const cUP = "#39ff14"; const cDOWN = "#ff003c";
@@ -173,11 +184,15 @@
         const pool = [];
         for(let t=1; t<=5; t++) {
             let tierItems = rawItems.filter(x => x.t === t);
+            let itemsInTier = (t === 1) ? 2 : 1;
+            let w = tWeights[t] / itemsInTier; // Chia đều trọng số cho các vật phẩm cùng tier
+            
             let picked = tierItems[i % tierItems.length]; 
-            pool.push({ n: picked.n, c: tColors[t], p: picked.p, t: t, w: tWeights[t] });
+            pool.push({ n: picked.n, c: tColors[t], p: picked.p, t: t, w: w });
+            
             if(t === 1) { 
                 let picked2 = tierItems[(i+1) % tierItems.length];
-                pool.push({ n: picked2.n, c: tColors[t], p: picked2.p, t: t, w: tWeights[t] });
+                pool.push({ n: picked2.n, c: tColors[t], p: picked2.p, t: t, w: w });
             }
         }
         let price = Math.floor(Math.random() * 150 + 50) + (i > 10 ? 300 : 0) + (i > 15 ? 1000 : 0);
@@ -275,19 +290,17 @@
         });
     }
 
-    // --- HỆ THỐNG ANIMATION ROULETTE CS:GO ---
+    // --- HỆ THỐNG ANIMATION ROULETTE ---
     function openCaseAnimation(caseId) {
         const c = casesDB.find(x => x.id === caseId);
         if (player.balance < c.price) { showToast('KHÔNG ĐỦ TIỀN!', cDOWN); return; }
 
-        // Trừ tiền ngay lập tức
         player.balance -= c.price;
         player.casesOpened++;
         updateHeaderBalance();
 
-        // 1. Thuật toán chọn đồ
-        let rand = Math.random() * 100, cum = 0, pulledItem = c.pool[0];
-        for (let p of c.pool) { cum += p.w; if (rand <= cum) { pulledItem = p; break; } }
+        // 1. Áp dụng hàm random có trọng số mới
+        let pulledItem = weightedPick(c.pool);
 
         // 2. Setup Modal
         const modal = document.getElementById('gacha-modal');
@@ -302,48 +315,44 @@
         strip.style.transition = 'none';
         strip.style.transform = 'translateX(0)';
 
-        // 3. Tạo 60 ô vật phẩm (Ô thứ 50 sẽ là ô trúng thưởng)
+        // 3. Tạo 60 ô vật phẩm
         let html = '';
         const winningIndex = 50;
-        const itemWidth = 110; // CSS: 100px width + 10px margin (5px trái + 5px phải)
+        const itemWidth = 110; 
 
         for(let i=0; i<60; i++) {
             let tempItem;
             if(i === winningIndex) {
                 tempItem = pulledItem;
             } else {
-                // Random filler items
-                let r = Math.random() * 100, c_temp = 0;
-                for (let p of c.pool) { c_temp += p.w; if (r <= c_temp) { tempItem = p; break; } }
+                // Áp dụng hàm random có trọng số cho cả các món đồ làm nền
+                tempItem = weightedPick(c.pool);
             }
             html += `<div class="roller-item" style="border-color: ${tempItem.c}; color: ${tempItem.c}">${tempItem.n}</div>`;
         }
         strip.innerHTML = html;
         modal.style.display = 'flex';
 
-        // 4. Kích hoạt hiệu ứng trượt gia tốc
+        // 4. Kích hoạt hiệu ứng
         setTimeout(() => {
             const screenCenter = window.innerWidth / 2;
-            // Độ lệch random (± 40px) để vạch không dừng chính giữa hoàn hảo
             const randomOffset = Math.floor(Math.random() * 80) - 40; 
             const stopPosition = (winningIndex * itemWidth) + (itemWidth / 2) - screenCenter + randomOffset;
 
-            // Áp dụng Cubic-Bezier: Chạy cực nhanh lúc đầu, giảm tốc từ từ lúc sau
             strip.style.transition = 'transform 6s cubic-bezier(0.15, 0.9, 0.15, 1)';
             strip.style.transform = `translateX(-${stopPosition}px)`;
 
-            // 5. Kết thúc vòng quay
+            // 5. Kết thúc
             setTimeout(() => {
                 title.innerHTML = `BẠN NHẬN ĐƯỢC:<br>${pulledItem.n}`;
                 title.style.color = pulledItem.c;
                 title.style.textShadow = `0 0 10px ${pulledItem.c}`;
                 btnClose.style.display = 'block';
 
-                // Lưu vào kho đồ
                 player.inventory.unshift({ id: Date.now() + Math.random(), n: pulledItem.n, c: pulledItem.c, baseP: pulledItem.p, t: pulledItem.t });
                 saveGame();
-            }, 6200); // 6s transition + 200ms an toàn
-        }, 50); // Delay 50ms cho DOM kịp render
+            }, 6200);
+        }, 50); 
     }
 
     function closeGachaModal() {
