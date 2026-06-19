@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pixel-gacha-v1';
+const CACHE_NAME = 'pixel-gacha-v2';
 const urlsToCache = [
   './',
   './index.html',
