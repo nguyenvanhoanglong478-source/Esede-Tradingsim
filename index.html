@@ -41,17 +41,14 @@
         .pixel-btn:active { transform: translate(2px, 2px); box-shadow: none; }
         .pixel-btn:disabled { background: #333; color: #777; border-color: #555; box-shadow: none; transform: none; cursor: not-allowed; }
 
-        /* --- HEADER --- */
         header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 2px dashed #444; background: var(--bg-panel); z-index: 10; }
         .header-title { font-size: 22px; color: var(--t5); animation: neonGlow 2s infinite; }
         .header-balance { font-size: 24px; color: var(--up); text-shadow: 2px 2px 0px #004400; transition: transform 0.1s; }
         .header-balance.bump { transform: scale(1.1); } 
 
-        /* --- SCREENS --- */
         .screen { display: none; flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 85px; }
         .screen.active { display: block; animation: slideFadeUp 0.2s ease-out; }
 
-        /* --- HOME (BỎ FLOAT) --- */
         .case-list { display: flex; flex-direction: column; gap: 20px; }
         .case-card { border: 2px solid; padding: 15px; background: #0a0a0a; display: flex; flex-direction: column; gap: 10px; text-align: center; }
         .case-card.shaking { animation: shake 0.4s ease-in-out; border-color: white !important; background: #222; }
@@ -60,33 +57,28 @@
         .case-preview { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin: 5px 0; }
         .color-dot { width: 12px; height: 12px; border: 1px solid #fff; }
 
-        /* --- GRIDS --- */
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .item-card { border: 2px solid #444; padding: 10px; background: #000; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; animation: popIn 0.2s ease-out; }
         .item-name { font-size: 16px; line-height: 1.2; }
         .item-price { font-size: 18px; color: #fff; transition: color 0.3s; }
 
-        /* --- QUESTS --- */
         .quest-card { border: 2px dashed #555; padding: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; }
         .quest-info { display: flex; flex-direction: column; gap: 8px; width: 65%; }
         .quest-title { font-size: 18px; color: var(--t5); }
         .btn-claim { font-size: 14px; padding: 8px; background: var(--t5); color: #000; border-color: #000; }
 
-        /* --- MODAL TRADE --- */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; z-index: 100; padding: 15px; justify-content: center; }
         .modal.show { display: flex; }
         .modal-box { background: var(--bg-panel); border: 2px solid white; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
         .modal-header { display: flex; justify-content: space-between; font-size: 18px; border-bottom: 2px solid #555; padding-bottom: 10px; align-items: center;}
-        .chart-wrapper { height: 220px; width: 100%; background: #000; border: 1px solid #333; padding: 5px; position: relative; } /* Thêm relative cho Chart.js */
+        .chart-wrapper { height: 220px; width: 100%; background: #000; border: 1px solid #333; padding: 5px; position: relative; } 
 
-        /* --- BOTTOM NAV --- */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: var(--bg-panel); border-top: 2px solid #555; display: flex; z-index: 999; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; color: #666; font-size: 14px; cursor: pointer; transition: 0.2s; }
         .nav-item.active { color: var(--primary); transform: translateY(-3px); }
         .nav-item i { font-size: 20px; transition: transform 0.2s; }
         .nav-item.active i { transform: scale(1.1); color: var(--up); text-shadow: 0 0 10px var(--up); }
 
-        /* --- TOAST --- */
         #toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 5px; width: 90%; pointer-events: none;}
         .toast { background: rgba(0,0,0,0.9); padding: 12px; font-size: 16px; text-align: center; border: 2px solid white; line-height: 1.5; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: opacity 0.2s; }
     </style>
@@ -127,7 +119,7 @@
                 <button class="pixel-btn" style="padding: 5px 12px;" onclick="closeModal()">X</button>
             </div>
             <div class="chart-wrapper"><canvas id="itemChart"></canvas></div>
-            <div style="text-align: center; font-size: 18px; margin: 10px 0;">GIÁ: <span id="modal-item-price" style="color: var(--up);">0$</span></div>
+            <div style="text-align: center; font-size: 18px; margin: 10px 0;">GIÁ HIỆN TẠI: <span id="modal-item-price" style="color: var(--up);">0$</span></div>
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button class="pixel-btn" style="flex: 1; background: var(--up); color: #000;" id="btn-modal-buy">MUA VÀO</button>
                 <button class="pixel-btn" style="flex: 1; background: var(--down); color: #fff;" id="btn-modal-sell">BÁN RA</button>
@@ -144,20 +136,19 @@
     </nav>
 
 <script>
-    // --- 1. HỆ THỐNG DỮ LIỆU TỰ ĐỘNG SINH (50 MÓN, 20 HÒM) ---
+    // --- BẢNG MÀU HEX CHUẨN ĐỂ VẼ CANVAS (Giải quyết lỗi Canvas không hiểu biến var(--CSS) ) ---
+    const tColors = {1:"#4b69ff", 2:"#8847ff", 3:"#d32ce6", 4:"#eb4b4b", 5:"#ffd700"};
+    const cUP = "#39ff14";
+    const cDOWN = "#ff003c";
+
     const rawItems = [
-        // Bậc 1 (Xanh biển) - 15 món
         {n:"P250 Sand Dune", p:2, t:1},{n:"Glock Death Rattle", p:3, t:1},{n:"MAC-10 Indigo", p:4, t:1},{n:"MP7 Army Recon", p:5, t:1},{n:"UMP Scorched", p:6, t:1},{n:"Nova Walnut", p:7, t:1},{n:"SG553 Army", p:8, t:1},{n:"AUG Storm", p:9, t:1},{n:"FAMAS Cyan", p:10, t:1},{n:"Galil Sage", p:11, t:1},{n:"M249 Contrast", p:12, t:1},{n:"Negev Terrain", p:13, t:1},{n:"G3SG1 Desert", p:14, t:1},{n:"P90 Sand Spray", p:15, t:1},{n:"XM1014 Grass", p:16, t:1},
-        // Bậc 2 (Tím) - 13 món
         {n:"USP-S Guardian", p:20, t:2},{n:"Deagle Meteorite", p:25, t:2},{n:"M4A1-S Boreal", p:30, t:2},{n:"AWP Safari", p:35, t:2},{n:"P90 Ash Wood", p:40, t:2},{n:"CZ75 Twist", p:45, t:2},{n:"Dual Berettas", p:50, t:2},{n:"Five-SeveN Forest", p:55, t:2},{n:"P2000 Granite", p:60, t:2},{n:"XM1014 Spruce", p:65, t:2},{n:"MAC-10 Candy", p:70, t:2},{n:"Bizon Urban", p:75, t:2},{n:"SSG 08 Acid", p:80, t:2},
-        // Bậc 3 (Hồng) - 10 món
         {n:"M4A4 Dragon King", p:100, t:3},{n:"AWP Worm God", p:120, t:3},{n:"AK-47 Elite Build", p:150, t:3},{n:"Glock Water", p:180, t:3},{n:"M4A1-S Guardian", p:200, t:3},{n:"USP-S Cortex", p:250, t:3},{n:"Deagle Conspiracy", p:300, t:3},{n:"P250 Muertos", p:350, t:3},{n:"CZ75 Yellow", p:400, t:3},{n:"Five-SeveN Monkey", p:450, t:3},
-        // Bậc 4 (Đỏ) - 7 món
         {n:"AK-47 Redline", p:800, t:4},{n:"AWP Asiimov", p:1200, t:4},{n:"M4A4 Howl", p:2000, t:4},{n:"M4A1-S Cyrex", p:1500, t:4},{n:"USP-S Kill", p:1800, t:4},{n:"Deagle Blaze", p:2500, t:4},{n:"Glock Fade", p:3000, t:4},
-        // Bậc 5 (Vàng) - 5 món
         {n:"★ Karambit Fade", p:8000, t:5},{n:"★ Butterfly", p:10000, t:5},{n:"★ M9 Bayonet", p:9500, t:5},{n:"★ Gloves Vice", p:15000, t:5},{n:"★ AWP Gungnir", p:25000, t:5}
     ];
-    const tColors = {1:"var(--t1)", 2:"var(--t2)", 3:"var(--t3)", 4:"var(--t4)", 5:"var(--t5)"};
+    
     const tWeights = {1: 70, 2: 20, 3: 8, 4: 1.5, 5: 0.5};
 
     const caseNames = ["Chroma", "Gamma", "Spectrum", "Clutch", "Danger Zone", "Prisma", "Fracture", "Snakebite", "Dreams", "Recoil", "Revolution", "CS20", "Horizon", "Glove", "Shadow", "Falchion", "Huntsman", "Winter", "Bravo", "Weapon 1"];
@@ -167,7 +158,7 @@
             let tierItems = rawItems.filter(x => x.t === t);
             let picked = tierItems[i % tierItems.length]; 
             pool.push({ n: picked.n, c: tColors[t], p: picked.p, w: tWeights[t] });
-            if(t === 1) { // Thêm 1 món xanh nữa cho đa dạng
+            if(t === 1) { 
                 let picked2 = tierItems[(i+1) % tierItems.length];
                 pool.push({ n: picked2.n, c: tColors[t], p: picked2.p, w: tWeights[t] });
             }
@@ -188,18 +179,15 @@
         { id: 'q7', title: 'Tài phiệt: Mở 1000 hòm', target: 1000, reward: 500000 },
         { id: 'q8', title: 'Bá chủ: Mở 2500 hòm', target: 2500, reward: 1500000 },
         { id: 'q9', title: 'Huyền thoại: Mở 5000 hòm', target: 5000, reward: 5000000 },
-        { id: 'q10', title: 'Kẻ Ghiền Gacha: Mở 10000 hòm', target: 10000, reward: 20000000 }
+        { id: 'q10', title: 'Ghiền Gacha: Mở 10000 hòm', target: 10000, reward: 20000000 }
     ];
 
-    // --- 2. LOCAL STORAGE ---
     let player = JSON.parse(localStorage.getItem('pixelGachaX')) || { balance: 10000.00, casesOpened: 0, inventory: [], questClaimed: [] };
     function saveGame() { localStorage.setItem('pixelGachaX', JSON.stringify(player)); updateHeaderBalance(); }
     function resetGame() { if(confirm("Xóa dữ liệu chơi?")) { localStorage.removeItem('pixelGachaX'); location.reload(); } }
 
-    // --- 3. ĐỘNG CƠ THỊ TRƯỜNG & CHỐNG LỖI BIỂU ĐỒ ---
     let marketHistory = [];
     let currentMultiplier = 1.000;
-    // Bơm trước 30 điểm dữ liệu giả để biểu đồ không bị đường thẳng khi mới tải trang
     for(let i=0; i<30; i++) { marketHistory.push(currentMultiplier); currentMultiplier *= (1 + (Math.random()*6-3)/100); }
 
     setInterval(() => {
@@ -207,13 +195,11 @@
         if (currentMultiplier < 0.1) currentMultiplier = 0.1;
         marketHistory.push(currentMultiplier); marketHistory.shift();
 
-        // CHỈ CẬP NHẬT GIÁ TIỀN - KHÔNG VẼ LẠI GIAO DIỆN CHỐNG CHỚP CHỚP
         if(document.getElementById('screen-trade').classList.contains('active')) updateTradePrices();
         if(document.getElementById('screen-backpack').classList.contains('active')) updateBackpackPrices();
         if(currentActiveTradeItem && document.getElementById('trade-modal').classList.contains('show')) updateModalLivePrice();
     }, 1500);
 
-    // --- 4. HÀM CẬP NHẬT CHỈ SỐ NHẸ (NO DOM TRASHING) ---
     function updateTradePrices() {
         marketItemsDB.forEach(item => {
             const el = document.getElementById(`trade-p-${item.id}`);
@@ -231,7 +217,6 @@
         document.getElementById('bp-value').innerText = total.toFixed(2) + '$';
     }
 
-    // --- 5. RENDER CÁC MÀN HÌNH (Chỉ chạy 1 lần khi chuyển tab) ---
     function switchTab(tabId) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         event.currentTarget.classList.add('active');
@@ -260,7 +245,6 @@
         balEl.classList.remove('bump'); void balEl.offsetWidth; balEl.classList.add('bump');
     }
 
-    // HOME
     function renderHome() {
         const container = document.getElementById('case-container');
         container.innerHTML = '';
@@ -279,7 +263,7 @@
 
     function openCase(caseId) {
         const c = casesDB.find(x => x.id === caseId);
-        if (player.balance < c.price) { showToast('KHÔNG ĐỦ TIỀN!', 'var(--down)'); return; }
+        if (player.balance < c.price) { showToast('KHÔNG ĐỦ TIỀN!', cDOWN); return; }
         
         const cardEl = document.getElementById(`card-${caseId}`);
         cardEl.classList.add('shaking');
@@ -296,7 +280,6 @@
         }, 400); 
     }
 
-    // TRADE
     function renderTradeMarket() {
         const container = document.getElementById('trade-grid');
         container.innerHTML = '';
@@ -311,7 +294,6 @@
         });
     }
 
-    // BACKPACK
     function renderBackpack() {
         const container = document.getElementById('backpack-grid');
         container.innerHTML = '';
@@ -324,10 +306,10 @@
                     <div class="item-name" style="color: ${item.c}">${item.n}</div>
                     <div class="item-price" id="bp-p-${item.id}">${livePrice.toFixed(2)}$</div>
                     <button class="pixel-btn" style="margin-top:8px; padding: 8px; font-size:14px;" onclick="sellBackpackItem(${item.id})">BÁN</button>
-                </div>
-            `;
+        </div>
+    `;
         });
-        updateBackpackPrices(); // Gọi luôn để tính tổng
+        updateBackpackPrices(); 
     }
 
     function sellBackpackItem(id) {
@@ -335,11 +317,10 @@
         if (idx > -1) {
             const livePrice = player.inventory[idx].baseP * currentMultiplier;
             player.balance += livePrice; player.inventory.splice(idx, 1);
-            saveGame(); renderBackpack(); showToast(`ĐÃ BÁN +${livePrice.toFixed(2)}$`, 'var(--up)');
+            saveGame(); renderBackpack(); showToast(`ĐÃ BÁN +${livePrice.toFixed(2)}$`, cUP);
         }
     }
 
-    // QUESTS
     function renderQuests() {
         const container = document.getElementById('quest-container');
         container.innerHTML = '';
@@ -365,11 +346,10 @@
     function claimQuest(qid, reward) {
         if (!player.questClaimed.includes(qid)) {
             player.questClaimed.push(qid); player.balance += reward;
-            saveGame(); renderQuests(); showToast(`NHẬN THƯỞNG +${reward}$`, 'var(--up)');
+            saveGame(); renderQuests(); showToast(`NHẬN THƯỞNG +${reward}$`, cUP);
         }
     }
 
-    // PROFILE
     function renderProfile() {
         document.getElementById('prof-balance').innerText = player.balance.toFixed(2) + '$';
         document.getElementById('prof-cases').innerText = player.casesOpened;
@@ -377,9 +357,37 @@
         document.getElementById('prof-inv-value').innerText = invVal.toFixed(2) + '$';
     }
 
-    // MODAL
+    // --- CHART & MODAL LOGIC VỚI MÀU HEX ---
     Chart.defaults.font.family = "'VT323', monospace"; Chart.defaults.color = "#aaaaaa";
     let modalChartInstance = null; let currentActiveTradeItem = null;
+
+    function drawChart(item) {
+        const ctx = document.getElementById('itemChart').getContext('2d');
+        const itemHistory = marketHistory.map(m => m * item.baseP);
+
+        if (modalChartInstance) modalChartInstance.destroy();
+        modalChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array(30).fill(''),
+                datasets: [{
+                    data: itemHistory,
+                    borderColor: item.c,  // Đã sửa thành mã Hex
+                    borderWidth: 3, 
+                    tension: 0, 
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: { duration: 0 },
+                scales: {
+                    x: { display: false },
+                    y: { position: 'right', grid: { color: '#333' }, ticks: { font: { size: 14 } } }
+                },
+                plugins: { legend: { display: false }, tooltip: { enabled: false } }
+            }
+        });
+    }
 
     function openTradeModal(itemId) {
         currentActiveTradeItem = marketItemsDB.find(i => i.id === itemId);
@@ -387,23 +395,22 @@
         document.getElementById('modal-item-name').style.color = currentActiveTradeItem.c;
         
         const modal = document.getElementById('trade-modal');
-        modal.style.display = 'flex'; modal.classList.add('show');
+        modal.style.display = 'flex';
         
+        requestAnimationFrame(() => {
+            modal.classList.add('show');
+            drawChart(currentActiveTradeItem);
+            updateModalLivePrice();
+        });
+
         document.getElementById('btn-modal-buy').onclick = () => buyMarketItem(currentActiveTradeItem);
         document.getElementById('btn-modal-sell').onclick = () => sellMarketItem(currentActiveTradeItem);
-
-        updateModalLivePrice();
-        const ctx = document.getElementById('itemChart').getContext('2d');
-        const itemHistory = marketHistory.map(m => m * currentActiveTradeItem.baseP);
-
-        if (modalChartInstance) modalChartInstance.destroy();
-        modalChartInstance = new Chart(ctx, {
-            type: 'line', data: { labels: Array(30).fill(''), datasets: [{ data: itemHistory, borderColor: currentActiveTradeItem.c, borderWidth: 2, stepped: true, pointRadius: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, scales: { x: { display: false }, y: { position: 'right', grid: { color: '#333' }, ticks: { font: { size: 12 } } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-        });
     }
 
-    function closeModal() { document.getElementById('trade-modal').classList.remove('show'); setTimeout(() => { document.getElementById('trade-modal').style.display = 'none'; currentActiveTradeItem = null; }, 100); }
+    function closeModal() { 
+        document.getElementById('trade-modal').classList.remove('show'); 
+        setTimeout(() => { document.getElementById('trade-modal').style.display = 'none'; currentActiveTradeItem = null; }, 100); 
+    }
 
     function updateModalLivePrice() {
         if(!currentActiveTradeItem) return;
@@ -413,7 +420,8 @@
         if(modalChartInstance) {
             const itemHistory = marketHistory.map(m => m * currentActiveTradeItem.baseP);
             modalChartInstance.data.datasets[0].data = itemHistory;
-            modalChartInstance.data.datasets[0].borderColor = itemHistory[29] >= itemHistory[28] ? 'var(--up)' : 'var(--down)';
+            // Sửa màu cập nhật thành mã Hex
+            modalChartInstance.data.datasets[0].borderColor = itemHistory[29] >= itemHistory[28] ? cUP : cDOWN;
             modalChartInstance.update();
         }
     }
@@ -423,8 +431,8 @@
         if(player.balance >= livePrice) {
             player.balance -= livePrice;
             player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP });
-            saveGame(); showToast(`ĐÃ MUA:<br>${item.n}`, 'var(--up)');
-        } else { showToast('KHÔNG ĐỦ TIỀN MẶT!', 'var(--down)'); }
+            saveGame(); showToast(`ĐÃ MUA:<br>${item.n}`, cUP);
+        } else { showToast('KHÔNG ĐỦ TIỀN MẶT!', cDOWN); }
     }
 
     function sellMarketItem(item) {
@@ -432,11 +440,10 @@
         if(idx > -1) {
             const livePrice = player.inventory[idx].baseP * currentMultiplier;
             player.balance += livePrice; player.inventory.splice(idx, 1);
-            saveGame(); showToast(`ĐÃ BÁN:<br>${item.n}`, 'var(--up)');
-        } else { showToast('BẠN CHƯA CÓ<br>MÓN ĐỒ NÀY!', 'var(--down)'); }
+            saveGame(); showToast(`ĐÃ BÁN:<br>${item.n}`, cUP);
+        } else { showToast('BẠN CHƯA CÓ<br>MÓN ĐỒ NÀY!', cDOWN); }
     }
 
-    // INIT
     updateHeaderBalance(); renderHome(); renderTradeMarket();
 </script>
 </body>
