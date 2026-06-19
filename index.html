@@ -21,12 +21,16 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'VT323', monospace; }
         body { background-color: var(--bg-dark); color: var(--primary); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- ANIMATIONS TỐI ƯU --- */
         @keyframes slideFadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px) rotate(-2deg); }
+            50% { transform: translateX(5px) rotate(2deg); }
+            75% { transform: translateX(-5px) rotate(-2deg); }
+        }
         @keyframes neonGlow { 0%, 100% { text-shadow: 0 0 5px currentColor; } 50% { text-shadow: 0 0 2px currentColor; } }
 
-        /* --- UI COMPONENTS --- */
         .pixel-btn {
             background: var(--bg-dark); color: var(--primary); border: 2px solid var(--primary);
             padding: 10px; font-size: 18px; cursor: pointer; text-transform: uppercase;
@@ -35,52 +39,65 @@
         .pixel-btn:active { transform: translate(2px, 2px); box-shadow: none; }
         .pixel-btn:disabled { background: #333; color: #777; border-color: #555; box-shadow: none; transform: none; cursor: not-allowed; }
 
-        /* --- HEADER --- */
         header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 2px dashed #444; background: var(--bg-panel); z-index: 10; }
-        .header-title { font-size: 22px; color: var(--t5); animation: neonGlow 2s infinite; }
+        .header-title { font-size: 22px; color: var(--t5); animation: neonGlow 2s infinite; display: flex; gap: 10px; align-items: center;}
+        .sound-icon { color: var(--primary); cursor: pointer; font-size: 18px; } /* Icon âm thanh */
         .header-balance { font-size: 24px; color: var(--up); text-shadow: 2px 2px 0px #004400; transition: transform 0.1s; }
         .header-balance.bump { transform: scale(1.1); } 
 
-        /* --- SCREENS --- */
         .screen { display: none; flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 85px; }
         .screen.active { display: block; animation: slideFadeUp 0.2s ease-out; }
 
-        /* --- HOME --- */
+        /* Sửa lại layout Home Card để nhét thêm nút x10 và Tỉ lệ */
         .case-list { display: flex; flex-direction: column; gap: 20px; }
         .case-card { border: 2px solid; padding: 15px; background: #0a0a0a; display: flex; flex-direction: column; gap: 10px; text-align: center; }
+        .case-card.shaking { animation: shake 0.4s ease-in-out; border-color: white !important; background: #222; }
         .case-title { font-size: 24px; text-shadow: 2px 2px 0px #000; }
         .case-price-tag { font-size: 16px; color: #aaa; }
         .case-preview { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin: 5px 0; }
         .color-dot { width: 12px; height: 12px; border: 1px solid #fff; }
+        .case-actions { display: flex; gap: 5px; }
+        .btn-rate { flex: 1; background: #333; font-size: 14px; padding: 8px;}
+        .btn-x1 { flex: 2; background: var(--t5); color: #000; font-size: 14px; padding: 8px; border-color: #000;}
+        .btn-x10 { flex: 2; background: var(--t3); color: #fff; font-size: 14px; padding: 8px; border-color: #fff;}
 
-        /* --- GRIDS --- */
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .item-card { border: 2px solid #444; padding: 10px; background: #000; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; animation: popIn 0.2s ease-out; }
         .item-name { font-size: 16px; line-height: 1.2; }
         .item-price { font-size: 18px; color: #fff; transition: color 0.3s; }
 
-        /* --- QUESTS --- */
         .quest-card { border: 2px dashed #555; padding: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; background: #111; }
         .quest-info { display: flex; flex-direction: column; gap: 8px; width: 65%; }
         .quest-title { font-size: 18px; color: var(--t5); }
         .btn-claim { font-size: 14px; padding: 8px; background: var(--t5); color: #000; border-color: #000; }
 
-        /* --- MODAL TRADE --- */
+        /* MODAL CHUNG */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; z-index: 100; padding: 15px; justify-content: center; }
         .modal.show { display: flex; }
-        .modal-box { background: var(--bg-panel); border: 2px solid white; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .modal-box { background: var(--bg-panel); border: 2px solid white; padding: 12px; display: flex; flex-direction: column; gap: 10px; max-height: 80vh; overflow-y: auto;}
         .modal-header { display: flex; justify-content: space-between; font-size: 18px; border-bottom: 2px solid #555; padding-bottom: 10px; align-items: center;}
+        
         .chart-wrapper { height: 220px; width: 100%; background: #000; border: 1px solid #333; padding: 5px; position: relative; }
 
-        /* --- MODAL QUAY GACHA (ROULETTE) --- */
+        /* UI TỈ LỆ (RATES) VÀ PITY */
+        .pity-container { background: #000; border: 1px dashed #555; padding: 10px; text-align: center;}
+        .pity-bar-bg { width: 100%; height: 10px; background: #222; margin-top: 5px; border: 1px solid #555; position: relative;}
+        .pity-bar-fill { height: 100%; background: var(--t4); width: 0%; transition: width 0.3s;}
+        .rate-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #333; font-size: 14px;}
+        .rate-item span:last-child { color: #fff; }
+
+        /* GACHA MODAL */
         #gacha-modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #050505; z-index: 2000; display: none; flex-direction: column; justify-content: center; align-items: center; }
-        .gacha-title { font-size: 24px; color: white; margin-bottom: 30px; text-align: center; line-height: 1.5; padding: 0 10px; }
-        .roller-container { width: 100%; height: 120px; background: #111; border-top: 2px solid #333; border-bottom: 2px solid #333; position: relative; overflow: hidden; }
+        .gacha-title { font-size: 24px; color: white; margin-bottom: 20px; text-align: center; line-height: 1.5; padding: 0 10px; }
+        .roller-container { width: 100%; height: 120px; background: #111; border-top: 2px solid #333; border-bottom: 2px solid #333; position: relative; overflow: hidden; display: flex;}
         .roller-center-line { position: absolute; left: 50%; top: 0; width: 4px; height: 100%; background: var(--t5); z-index: 10; transform: translateX(-50%); box-shadow: 0 0 15px var(--t5); }
         .roller-strip { display: flex; height: 100%; width: max-content; }
         .roller-item { width: 100px; height: 100px; background: #000; margin: 10px 5px; border-bottom: 6px solid; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; flex-shrink: 0; padding: 5px; }
+        
+        /* UI GRID x10 KẾT QUẢ */
+        .x10-grid { display: none; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 90%; max-width: 400px; padding: 10px; background: #111; border: 2px solid #444; }
+        .x10-item { aspect-ratio: 1; border-bottom: 4px solid; background: #000; display: flex; align-items: center; justify-content: center; font-size: 10px; text-align: center; padding: 2px; animation: popIn 0.3s; word-wrap: break-word;}
 
-        /* --- BOTTOM NAV --- */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: var(--bg-panel); border-top: 2px solid #555; display: flex; z-index: 999; padding-bottom: env(safe-area-inset-bottom); }
         .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; color: #666; font-size: 14px; cursor: pointer; transition: 0.2s; }
         .nav-item.active { color: var(--primary); transform: translateY(-3px); }
@@ -94,7 +111,10 @@
 <body>
 
     <header>
-        <div class="header-title" id="screen-title">CỬA HÀNG</div>
+        <div class="header-title" id="screen-title">
+            <i class="fa-solid fa-volume-high sound-icon" id="sound-icon" onclick="toggleSound()"></i>
+            CỬA HÀNG
+        </div>
         <div class="header-balance" id="header-balance">10000.00$</div>
     </header>
 
@@ -120,6 +140,22 @@
         <button class="pixel-btn" style="width: 100%; margin-top: 30px; border-color: var(--down); color: var(--down);" onclick="resetGame()">XÓA DỮ LIỆU</button>
     </div>
 
+    <div class="modal" id="rates-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span>TỈ LỆ RỚT ĐỒ</span>
+                <button class="pixel-btn" style="padding: 5px 12px;" onclick="closeRatesModal()">X</button>
+            </div>
+            <div class="pity-container">
+                <div style="font-size: 12px; color: var(--t4);">BẢO HIỂM HIẾM (PITY)</div>
+                <div style="font-size: 10px; color: #888; margin-top: 2px;">Tăng tỉ lệ Đỏ/Vàng sau 50 lần tịt</div>
+                <div class="pity-bar-bg"><div class="pity-bar-fill" id="pity-bar"></div></div>
+                <div style="font-size: 12px; margin-top: 4px;" id="pity-text">0 / 50</div>
+            </div>
+            <div id="rates-list" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+
     <div class="modal" id="trade-modal">
         <div class="modal-box">
             <div class="modal-header">
@@ -137,12 +173,18 @@
 
     <div id="gacha-modal">
         <div class="gacha-title" id="gacha-title">ĐANG QUAY...</div>
-        <div class="roller-container">
+        
+        <div class="roller-container" id="gacha-roller">
             <div class="roller-center-line"></div>
-            <div class="roller-strip" id="roller-strip">
-                </div>
+            <div class="roller-strip" id="roller-strip"></div>
         </div>
-        <button class="pixel-btn" id="btn-close-gacha" style="margin-top: 40px; display: none; padding: 15px 30px; font-size: 20px;" onclick="closeGachaModal()">TIẾP TỤC</button>
+        
+        <div class="x10-grid" id="x10-result-grid"></div>
+
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button class="pixel-btn" id="btn-skip-gacha" style="background: var(--t4); color: white; padding: 12px 25px;" onclick="skipGachaAnimation()">BỎ QUA</button>
+            <button class="pixel-btn" id="btn-close-gacha" style="display: none; padding: 12px 25px;" onclick="closeGachaModal()">ĐÓNG</button>
+        </div>
     </div>
 
     <nav class="bottom-nav">
@@ -154,18 +196,72 @@
     </nav>
 
 <script>
-    // --- HÀM RANDOM CÓ TRỌNG SỐ ---
-    function weightedPick(pool) {
-        const total = pool.reduce((sum, p) => sum + p.w, 0);
+    // ==========================================
+    // 1. SOUND ENGINE (WEB AUDIO API)
+    // ==========================================
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+    
+    function playTone(freq, type, duration, vol = 0.1) {
+        if(player.soundMuted) return;
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.type = type; 
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playTick() { playTone(800, 'sine', 0.05, 0.05); }
+    function playStop() { playTone(300, 'square', 0.2, 0.1); }
+    function playEpic() {
+        // Hợp âm báo trúng đồ xịn
+        playTone(440, 'sawtooth', 1.5, 0.1); // A4
+        playTone(554, 'sawtooth', 1.5, 0.1); // C#5
+        playTone(659, 'sawtooth', 1.5, 0.1); // E5
+    }
+
+    function toggleSound() {
+        player.soundMuted = !player.soundMuted;
+        saveGame(); updateSoundIcon();
+    }
+
+    function updateSoundIcon() {
+        const icon = document.getElementById('sound-icon');
+        icon.className = player.soundMuted ? "fa-solid fa-volume-xmark sound-icon" : "fa-solid fa-volume-high sound-icon";
+        icon.style.color = player.soundMuted ? "#555" : "var(--primary)";
+    }
+
+    // ==========================================
+    // 2. THUẬT TOÁN PITY VÀ RANDOM TRỌNG SỐ
+    // ==========================================
+    // Nếu tịt >= 50 lần, cộng dồn trọng số ảo cho đồ tier 4 và 5
+    function getPityAdjustedPool(basePool, pityCount) {
+        if (pityCount < 50) return basePool;
+        let boost = (pityCount - 50) * 0.15; // Tăng dần 0.15% mỗi lần tịt
+        return basePool.map(item => {
+            if (item.t >= 4) return { ...item, w: item.w + boost };
+            return item;
+        });
+    }
+
+    function weightedPickPity(pool, pityCount) {
+        let adjPool = getPityAdjustedPool(pool, pityCount);
+        let total = adjPool.reduce((sum, p) => sum + p.w, 0);
         let rand = Math.random() * total, cum = 0;
-        for (const p of pool) {
+        for (const p of adjPool) {
             cum += p.w;
             if (rand <= cum) return p;
         }
-        return pool[pool.length - 1];
+        return adjPool[adjPool.length - 1];
     }
 
-    // --- CẤU HÌNH BIẾN MÀU & DATABASE ---
+    // ==========================================
+    // 3. DATABASE KHỞI TẠO
+    // ==========================================
     const tColors = {1:"#4b69ff", 2:"#8847ff", 3:"#d32ce6", 4:"#eb4b4b", 5:"#ffd700"};
     const cUP = "#39ff14"; const cDOWN = "#ff003c";
 
@@ -185,7 +281,7 @@
         for(let t=1; t<=5; t++) {
             let tierItems = rawItems.filter(x => x.t === t);
             let itemsInTier = (t === 1) ? 2 : 1;
-            let w = tWeights[t] / itemsInTier; // Chia đều trọng số cho các vật phẩm cùng tier
+            let w = tWeights[t] / itemsInTier; 
             
             let picked = tierItems[i % tierItems.length]; 
             pool.push({ n: picked.n, c: tColors[t], p: picked.p, t: t, w: w });
@@ -206,16 +302,20 @@
         { id: 'q2', title: 'Tân binh: Mở 20 hòm', target: 20, reward: 2500 },
         { id: 'q3', title: 'Tay chơi: Mở 50 hòm', target: 50, reward: 8000 },
         { id: 'q4', title: 'Dân chuyên: Mở 100 hòm', target: 100, reward: 20000 },
-        { id: 'q5', title: 'Thương gia: Mở 250 hòm', target: 250, reward: 60000 },
-        { id: 'q6', title: 'Đại gia: Mở 500 hòm', target: 500, reward: 150000 }
+        { id: 'q5', title: 'Thương gia: Mở 250 hòm', target: 250, reward: 60000 }
     ];
 
-    let player = JSON.parse(localStorage.getItem('pixelGachaX')) || { balance: 10000.00, casesOpened: 0, inventory: [], questClaimed: [] };
+    // --- LOCAL STORAGE (Tương thích Pity & Sound) ---
+    let defaultPlayer = { balance: 10000.00, casesOpened: 0, inventory: [], questClaimed: [], pityCounter: {}, soundMuted: false };
+    let player = JSON.parse(localStorage.getItem('pixelGachaX')) || defaultPlayer;
+    if(!player.pityCounter) player.pityCounter = {};
+    if(player.soundMuted === undefined) player.soundMuted = false;
+
     function saveGame() { localStorage.setItem('pixelGachaX', JSON.stringify(player)); updateHeaderBalance(); }
     function resetGame() { if(confirm("Xóa dữ liệu chơi?")) { localStorage.removeItem('pixelGachaX'); location.reload(); } }
 
-    let marketHistory = [];
-    let currentMultiplier = 1.000;
+    // --- MARKET ENGINE ---
+    let marketHistory = []; let currentMultiplier = 1.000;
     for(let i=0; i<30; i++) { marketHistory.push(currentMultiplier); currentMultiplier *= (1 + (Math.random()*6-3)/100); }
 
     setInterval(() => {
@@ -228,43 +328,28 @@
         if(currentActiveTradeItem && document.getElementById('trade-modal').classList.contains('show')) updateModalLivePrice();
     }, 1500);
 
-    function updateTradePrices() {
-        marketItemsDB.forEach(item => {
-            const el = document.getElementById(`trade-p-${item.id}`);
-            if(el) el.innerText = (item.baseP * currentMultiplier).toFixed(2) + '$';
-        });
-    }
-
+    function updateTradePrices() { marketItemsDB.forEach(item => { const el = document.getElementById(`trade-p-${item.id}`); if(el) el.innerText = (item.baseP * currentMultiplier).toFixed(2) + '$'; }); }
     function updateBackpackPrices() {
         let total = 0;
-        player.inventory.forEach(item => {
-            const price = item.baseP * currentMultiplier; total += price;
-            const el = document.getElementById(`bp-p-${item.id}`);
-            if(el) el.innerText = price.toFixed(2) + '$';
-        });
+        player.inventory.forEach(item => { const price = item.baseP * currentMultiplier; total += price; const el = document.getElementById(`bp-p-${item.id}`); if(el) el.innerText = price.toFixed(2) + '$'; });
         document.getElementById('bp-value').innerText = total.toFixed(2) + '$';
     }
 
-    // --- LOGIC GIAO DIỆN CHUNG ---
+    // ==========================================
+    // 4. LOGIC GIAO DIỆN & TỈ LỆ (RATES MODAL)
+    // ==========================================
     function switchTab(tabId) {
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        document.getElementById(`screen-${tabId}`).classList.add('active');
-        
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); event.currentTarget.classList.add('active');
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(`screen-${tabId}`).classList.add('active');
         const titles = { home: 'CỬA HÀNG', trade: 'SÀN GIAO DỊCH', backpack: 'TÚI ĐỒ', quest: 'NHIỆM VỤ', profile: 'HỒ SƠ' };
-        document.getElementById('screen-title').innerText = titles[tabId];
+        document.getElementById('screen-title').innerHTML = `<i class="fa-solid fa-volume-${player.soundMuted ? 'xmark' : 'high'} sound-icon" id="sound-icon" onclick="toggleSound()"></i> ${titles[tabId]}`;
 
-        if (tabId === 'backpack') renderBackpack();
-        if (tabId === 'quest') renderQuests();
-        if (tabId === 'profile') renderProfile();
+        if (tabId === 'backpack') renderBackpack(); if (tabId === 'quest') renderQuests(); if (tabId === 'profile') renderProfile();
     }
 
     function showToast(msg, color = 'white') {
-        const c = document.getElementById('toast-container');
-        const t = document.createElement('div');
-        t.className = 'toast'; t.style.borderColor = color; t.innerHTML = msg;
-        c.appendChild(t);
+        const c = document.getElementById('toast-container'); const t = document.createElement('div');
+        t.className = 'toast'; t.style.borderColor = color; t.innerHTML = msg; c.appendChild(t);
         setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 200); }, 2000);
     }
 
@@ -284,75 +369,174 @@
                     <div class="case-title" style="color: ${c.color}">${c.name}</div>
                     <div class="case-price-tag">Giá: ${c.price}$</div>
                     <div class="case-preview">${dots}</div>
-                    <button class="pixel-btn" style="background: var(--t5); color: #000; border-color:#000;" onclick="openCaseAnimation('${c.id}')">MỞ HÒM</button>
+                    <div class="case-actions">
+                        <button class="pixel-btn btn-rate" onclick="openRatesModal('${c.id}')">TỈ LỆ</button>
+                        <button class="pixel-btn btn-x1" onclick="startGacha('${c.id}', 1)">x1</button>
+                        <button class="pixel-btn btn-x10" onclick="startGacha('${c.id}', 10)">x10</button>
+                    </div>
                 </div>
             `;
         });
     }
 
-    // --- HỆ THỐNG ANIMATION ROULETTE ---
-    function openCaseAnimation(caseId) {
+    // Hiển thị % Rớt & Pity
+    function openRatesModal(caseId) {
         const c = casesDB.find(x => x.id === caseId);
-        if (player.balance < c.price) { showToast('KHÔNG ĐỦ TIỀN!', cDOWN); return; }
+        const list = document.getElementById('rates-list');
+        const pityCount = player.pityCounter[caseId] || 0;
+        
+        // Render Pity Bar
+        document.getElementById('pity-bar').style.width = Math.min((pityCount / 50) * 100, 100) + '%';
+        document.getElementById('pity-text').innerText = `${pityCount} / 50`;
 
-        player.balance -= c.price;
-        player.casesOpened++;
-        updateHeaderBalance();
+        // Render Rates List
+        let totalWeight = c.pool.reduce((s, p) => s + p.w, 0);
+        let sortedPool = [...c.pool].sort((a,b) => b.w - a.w); // Xếp % từ cao xuống thấp
+        
+        list.innerHTML = '';
+        sortedPool.forEach(item => {
+            let percent = (item.w / totalWeight * 100).toFixed(2);
+            list.innerHTML += `<div class="rate-item"><span style="color: ${item.c}">${item.n}</span><span>${percent}%</span></div>`;
+        });
 
-        // 1. Áp dụng hàm random có trọng số mới
-        let pulledItem = weightedPick(c.pool);
+        document.getElementById('rates-modal').style.display = 'flex';
+    }
+    function closeRatesModal() { document.getElementById('rates-modal').style.display = 'none'; }
 
-        // 2. Setup Modal
-        const modal = document.getElementById('gacha-modal');
-        const strip = document.getElementById('roller-strip');
-        const btnClose = document.getElementById('btn-close-gacha');
+    // ==========================================
+    // 5. GACHA ROULETTE & SKIP LOGIC TÍCH HỢP x10
+    // ==========================================
+    let spinTimeoutId, tickIntervalId;
+    let currentGachaSession = null; // Lưu tạm dữ liệu vòng quay để hàm Skip gọi
+
+    function startGacha(caseId, amount) {
+        const c = casesDB.find(x => x.id === caseId);
+        const totalCost = c.price * amount;
+        
+        if (player.balance < totalCost) { showToast('KHÔNG ĐỦ TIỀN!', cDOWN); return; }
+
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+
+        const cardEl = document.getElementById(`card-${caseId}`);
+        cardEl.classList.add('shaking');
+        setTimeout(() => cardEl.classList.remove('shaking'), 400);
+
+        setTimeout(() => {
+            player.balance -= totalCost; player.casesOpened += amount;
+            updateHeaderBalance();
+
+            let pCount = player.pityCounter[caseId] || 0;
+            let pulledResults = [];
+            let highestItem = null;
+
+            // Xoay x lần, lưu kết quả
+            for(let i=0; i<amount; i++) {
+                let item = weightedPickPity(c.pool, pCount);
+                pulledResults.push(item);
+                
+                // Cập nhật Pity ngầm
+                if(item.t >= 4) pCount = 0; else pCount++;
+                
+                // Chọn item xịn nhất làm đại diện chạy Roulette
+                if(!highestItem || item.t > highestItem.t) highestItem = item;
+            }
+            player.pityCounter[caseId] = pCount;
+
+            // Lưu session cho hàm Skip
+            currentGachaSession = { pulledResults, amount, c };
+
+            // Setup giao diện quay
+            const modal = document.getElementById('gacha-modal');
+            const strip = document.getElementById('roller-strip');
+            const btnSkip = document.getElementById('btn-skip-gacha');
+            const btnClose = document.getElementById('btn-close-gacha');
+            const title = document.getElementById('gacha-title');
+            
+            document.getElementById('gacha-roller').style.display = 'flex';
+            document.getElementById('x10-result-grid').style.display = 'none';
+            title.innerText = amount === 1 ? "ĐANG QUAY..." : "ĐANG QUAY x10...";
+            title.style.color = "white"; title.style.textShadow = "none";
+            btnSkip.style.display = 'block'; btnClose.style.display = 'none';
+            strip.style.transition = 'none'; strip.style.transform = 'translateX(0)';
+
+            // Render 60 ô, ô số 50 là highestItem
+            let html = ''; const winningIndex = 50; const itemWidth = 110; 
+            for(let i=0; i<60; i++) {
+                let temp = (i === winningIndex) ? highestItem : weightedPickPity(c.pool, pCount);
+                html += `<div class="roller-item" style="border-color: ${temp.c}; color: ${temp.c}">${temp.n}</div>`;
+            }
+            strip.innerHTML = html;
+            modal.style.display = 'flex';
+
+            // Kích hoạt trượt + Âm thanh Tick
+            setTimeout(() => {
+                const screenCenter = window.innerWidth / 2;
+                const randomOffset = Math.floor(Math.random() * 80) - 40; 
+                const stopPosition = (winningIndex * itemWidth) + (itemWidth / 2) - screenCenter + randomOffset;
+
+                strip.style.transition = 'transform 6s cubic-bezier(0.15, 0.9, 0.15, 1)';
+                strip.style.transform = `translateX(-${stopPosition}px)`;
+
+                // Play Tick sound during transition
+                let ticks = 0;
+                tickIntervalId = setInterval(() => {
+                    ticks++; 
+                    if(ticks < 40) playTick(); // Chậm dần theo nhịp thì khó làm bằng setInterval tĩnh, nên cho tick nhanh đoạn đầu thôi
+                    else clearInterval(tickIntervalId);
+                }, 100);
+
+                spinTimeoutId = setTimeout(() => { endGachaAnimation(); }, 6200);
+            }, 50); 
+        }, 400); 
+    }
+
+    function skipGachaAnimation() {
+        if(!currentGachaSession) return;
+        clearTimeout(spinTimeoutId);
+        clearInterval(tickIntervalId);
+        document.getElementById('roller-strip').style.transition = 'none'; // Ngắt lập tức
+        endGachaAnimation();
+    }
+
+    function endGachaAnimation() {
+        const { pulledResults, amount, c } = currentGachaSession;
         const title = document.getElementById('gacha-title');
         
-        title.innerText = "ĐANG QUAY...";
-        title.style.color = "white";
-        title.style.textShadow = "none";
-        btnClose.style.display = 'none';
-        strip.style.transition = 'none';
-        strip.style.transform = 'translateX(0)';
+        document.getElementById('btn-skip-gacha').style.display = 'none';
+        document.getElementById('btn-close-gacha').style.display = 'block';
 
-        // 3. Tạo 60 ô vật phẩm
-        let html = '';
-        const winningIndex = 50;
-        const itemWidth = 110; 
+        // Check có đồ xịn không để báo âm thanh
+        let hasEpic = pulledResults.some(item => item.t >= 4);
+        if(hasEpic) playEpic(); else playStop();
 
-        for(let i=0; i<60; i++) {
-            let tempItem;
-            if(i === winningIndex) {
-                tempItem = pulledItem;
-            } else {
-                // Áp dụng hàm random có trọng số cho cả các món đồ làm nền
-                tempItem = weightedPick(c.pool);
-            }
-            html += `<div class="roller-item" style="border-color: ${tempItem.c}; color: ${tempItem.c}">${tempItem.n}</div>`;
+        // Push đồ vào kho
+        pulledResults.forEach(item => {
+            player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.p, t: item.t });
+        });
+        saveGame();
+
+        // Xử lý hiển thị
+        if (amount === 1) {
+            let item = pulledResults[0];
+            title.innerHTML = `BẠN NHẬN ĐƯỢC:<br>${item.n}`;
+            title.style.color = item.c; title.style.textShadow = `0 0 10px ${item.c}`;
+        } else {
+            // Hiển thị lưới x10
+            document.getElementById('gacha-roller').style.display = 'none';
+            const grid = document.getElementById('x10-result-grid');
+            grid.style.display = 'grid';
+            grid.innerHTML = '';
+            
+            let totalVal = 0;
+            pulledResults.forEach(item => {
+                totalVal += item.p * currentMultiplier;
+                grid.innerHTML += `<div class="x10-item" style="color: ${item.c}; border-color: ${item.c}">${item.n}</div>`;
+            });
+            
+            title.innerHTML = `KẾT QUẢ x10<br><span style="font-size: 16px; color: ${cUP}">Tổng Giá TT: ${totalVal.toFixed(2)}$</span>`;
+            title.style.color = "white"; title.style.textShadow = "none";
         }
-        strip.innerHTML = html;
-        modal.style.display = 'flex';
-
-        // 4. Kích hoạt hiệu ứng
-        setTimeout(() => {
-            const screenCenter = window.innerWidth / 2;
-            const randomOffset = Math.floor(Math.random() * 80) - 40; 
-            const stopPosition = (winningIndex * itemWidth) + (itemWidth / 2) - screenCenter + randomOffset;
-
-            strip.style.transition = 'transform 6s cubic-bezier(0.15, 0.9, 0.15, 1)';
-            strip.style.transform = `translateX(-${stopPosition}px)`;
-
-            // 5. Kết thúc
-            setTimeout(() => {
-                title.innerHTML = `BẠN NHẬN ĐƯỢC:<br>${pulledItem.n}`;
-                title.style.color = pulledItem.c;
-                title.style.textShadow = `0 0 10px ${pulledItem.c}`;
-                btnClose.style.display = 'block';
-
-                player.inventory.unshift({ id: Date.now() + Math.random(), n: pulledItem.n, c: pulledItem.c, baseP: pulledItem.p, t: pulledItem.t });
-                saveGame();
-            }, 6200);
-        }, 50); 
+        currentGachaSession = null;
     }
 
     function closeGachaModal() {
@@ -360,34 +544,23 @@
         if(document.getElementById('screen-quest').classList.contains('active')) renderQuests();
     }
 
+    // ==========================================
+    // 6. CÁC TÍNH NĂNG SPA CÒN LẠI (GIỮ NGUYÊN)
+    // ==========================================
     function renderTradeMarket() {
-        const container = document.getElementById('trade-grid');
-        container.innerHTML = '';
+        const container = document.getElementById('trade-grid'); container.innerHTML = '';
         marketItemsDB.forEach(item => {
             const livePrice = item.baseP * currentMultiplier;
-            container.innerHTML += `
-                <div class="item-card" style="border-top: 4px solid ${item.c}; cursor:pointer;" onclick="openTradeModal('${item.id}')">
-                    <div class="item-name" style="color: ${item.c}">${item.n}</div>
-                    <div class="item-price" id="trade-p-${item.id}">${livePrice.toFixed(2)}$</div>
-                </div>
-            `;
+            container.innerHTML += `<div class="item-card" style="border-top: 4px solid ${item.c}; cursor:pointer;" onclick="openTradeModal('${item.id}')"><div class="item-name" style="color: ${item.c}">${item.n}</div><div class="item-price" id="trade-p-${item.id}">${livePrice.toFixed(2)}$</div></div>`;
         });
     }
 
     function renderBackpack() {
-        const container = document.getElementById('backpack-grid');
-        container.innerHTML = '';
+        const container = document.getElementById('backpack-grid'); container.innerHTML = '';
         document.getElementById('bp-count').innerText = player.inventory.length;
-
         player.inventory.forEach(item => {
             const livePrice = item.baseP * currentMultiplier;
-            container.innerHTML += `
-                <div class="item-card" style="border-top: 4px solid ${item.c};">
-                    <div class="item-name" style="color: ${item.c}">${item.n}</div>
-                    <div class="item-price" id="bp-p-${item.id}">${livePrice.toFixed(2)}$</div>
-                    <button class="pixel-btn" style="margin-top:8px; padding: 8px; font-size:14px;" onclick="sellBackpackItem(${item.id})">BÁN</button>
-                </div>
-            `;
+            container.innerHTML += `<div class="item-card" style="border-top: 4px solid ${item.c};"><div class="item-name" style="color: ${item.c}">${item.n}</div><div class="item-price" id="bp-p-${item.id}">${livePrice.toFixed(2)}$</div><button class="pixel-btn" style="margin-top:8px; padding: 8px; font-size:14px;" onclick="sellBackpackItem(${item.id})">BÁN</button></div>`;
         });
         updateBackpackPrices(); 
     }
@@ -402,32 +575,17 @@
     }
 
     function renderQuests() {
-        const container = document.getElementById('quest-container');
-        container.innerHTML = '';
+        const container = document.getElementById('quest-container'); container.innerHTML = '';
         questsDB.forEach((q) => {
             let isClaimed = player.questClaimed.includes(q.id);
             let prog = Math.min((player.casesOpened / q.target) * 100, 100);
-            let btnHTML = isClaimed ? `<button class="pixel-btn" disabled style="font-size:14px; padding:8px;">XONG</button>` 
-                        : (player.casesOpened >= q.target ? `<button class="pixel-btn btn-claim" onclick="claimQuest('${q.id}', ${q.reward})">NHẬN ${q.reward}$</button>` 
-                        : `<div style="font-size:16px; color:#888;">${player.casesOpened}/${q.target}</div>`);
-
-            container.innerHTML += `
-                <div class="quest-card">
-                    <div class="quest-info">
-                        <div class="quest-title" style="${isClaimed ? 'color:#555' : ''}">${q.title}</div>
-                        <div style="width:100%; height:12px; background:#000; border:1px solid #555;"><div style="height:100%; background:${isClaimed ? '#555' : 'var(--up)'}; width:${prog}%"></div></div>
-                    </div>
-                    <div>${btnHTML}</div>
-                </div>
-            `;
+            let btnHTML = isClaimed ? `<button class="pixel-btn" disabled style="font-size:14px; padding:8px;">XONG</button>` : (player.casesOpened >= q.target ? `<button class="pixel-btn btn-claim" onclick="claimQuest('${q.id}', ${q.reward})">NHẬN ${q.reward}$</button>` : `<div style="font-size:16px; color:#888;">${player.casesOpened}/${q.target}</div>`);
+            container.innerHTML += `<div class="quest-card"><div class="quest-info"><div class="quest-title" style="${isClaimed ? 'color:#555' : ''}">${q.title}</div><div style="width:100%; height:12px; background:#000; border:1px solid #555;"><div style="height:100%; background:${isClaimed ? '#555' : 'var(--up)'}; width:${prog}%"></div></div></div><div>${btnHTML}</div></div>`;
         });
     }
 
     function claimQuest(qid, reward) {
-        if (!player.questClaimed.includes(qid)) {
-            player.questClaimed.push(qid); player.balance += reward;
-            saveGame(); renderQuests(); showToast(`NHẬN THƯỞNG +${reward}$`, cUP);
-        }
+        if (!player.questClaimed.includes(qid)) { player.questClaimed.push(qid); player.balance += reward; saveGame(); renderQuests(); showToast(`NHẬN THƯỞNG +${reward}$`, cUP); }
     }
 
     function renderProfile() {
@@ -437,72 +595,42 @@
         document.getElementById('prof-inv-value').innerText = invVal.toFixed(2) + '$';
     }
 
-    Chart.defaults.font.family = "'VT323', monospace"; Chart.defaults.color = "#aaaaaa";
     let modalChartInstance = null; let currentActiveTradeItem = null;
-
     function drawChart(item) {
         const ctx = document.getElementById('itemChart').getContext('2d');
         const itemHistory = marketHistory.map(m => m * item.baseP);
-
         if (modalChartInstance) modalChartInstance.destroy();
-        modalChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: { labels: Array(30).fill(''), datasets: [{ data: itemHistory, borderColor: item.c, borderWidth: 3, tension: 0, pointRadius: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, scales: { x: { display: false }, y: { position: 'right', grid: { color: '#333' }, ticks: { font: { size: 14 } } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-        });
+        modalChartInstance = new Chart(ctx, { type: 'line', data: { labels: Array(30).fill(''), datasets: [{ data: itemHistory, borderColor: item.c, borderWidth: 3, tension: 0, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, scales: { x: { display: false }, y: { position: 'right', grid: { color: '#333' }, ticks: { font: { size: 14 } } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } } });
     }
 
     function openTradeModal(itemId) {
         currentActiveTradeItem = marketItemsDB.find(i => i.id === itemId);
-        document.getElementById('modal-item-name').innerText = currentActiveTradeItem.n;
-        document.getElementById('modal-item-name').style.color = currentActiveTradeItem.c;
-        
-        const modal = document.getElementById('trade-modal');
-        modal.style.display = 'flex';
-        requestAnimationFrame(() => {
-            modal.classList.add('show'); drawChart(currentActiveTradeItem); updateModalLivePrice();
-        });
-        document.getElementById('btn-modal-buy').onclick = () => buyMarketItem(currentActiveTradeItem);
-        document.getElementById('btn-modal-sell').onclick = () => sellMarketItem(currentActiveTradeItem);
+        document.getElementById('modal-item-name').innerText = currentActiveTradeItem.n; document.getElementById('modal-item-name').style.color = currentActiveTradeItem.c;
+        const modal = document.getElementById('trade-modal'); modal.style.display = 'flex';
+        requestAnimationFrame(() => { modal.classList.add('show'); drawChart(currentActiveTradeItem); updateModalLivePrice(); });
+        document.getElementById('btn-modal-buy').onclick = () => buyMarketItem(currentActiveTradeItem); document.getElementById('btn-modal-sell').onclick = () => sellMarketItem(currentActiveTradeItem);
     }
 
-    function closeModal() { 
-        document.getElementById('trade-modal').classList.remove('show'); 
-        setTimeout(() => { document.getElementById('trade-modal').style.display = 'none'; currentActiveTradeItem = null; }, 100); 
-    }
-
+    function closeModal() { document.getElementById('trade-modal').classList.remove('show'); setTimeout(() => { document.getElementById('trade-modal').style.display = 'none'; currentActiveTradeItem = null; }, 100); }
     function updateModalLivePrice() {
         if(!currentActiveTradeItem) return;
         const livePrice = currentActiveTradeItem.baseP * currentMultiplier;
         document.getElementById('modal-item-price').innerText = livePrice.toFixed(2) + '$';
-        
-        if(modalChartInstance) {
-            const itemHistory = marketHistory.map(m => m * currentActiveTradeItem.baseP);
-            modalChartInstance.data.datasets[0].data = itemHistory;
-            modalChartInstance.data.datasets[0].borderColor = itemHistory[29] >= itemHistory[28] ? cUP : cDOWN;
-            modalChartInstance.update();
-        }
+        if(modalChartInstance) { const itemHistory = marketHistory.map(m => m * currentActiveTradeItem.baseP); modalChartInstance.data.datasets[0].data = itemHistory; modalChartInstance.data.datasets[0].borderColor = itemHistory[29] >= itemHistory[28] ? cUP : cDOWN; modalChartInstance.update(); }
     }
 
     function buyMarketItem(item) {
         const livePrice = item.baseP * currentMultiplier;
-        if(player.balance >= livePrice) {
-            player.balance -= livePrice;
-            player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP, t: item.t });
-            saveGame(); showToast(`ĐÃ MUA:<br>${item.n}`, cUP);
-        } else { showToast('KHÔNG ĐỦ TIỀN MẶT!', cDOWN); }
+        if(player.balance >= livePrice) { player.balance -= livePrice; player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP }); saveGame(); showToast(`ĐÃ MUA:<br>${item.n}`, cUP); } else { showToast('KHÔNG ĐỦ TIỀN MẶT!', cDOWN); }
     }
 
     function sellMarketItem(item) {
         const idx = player.inventory.findIndex(i => i.n === item.n);
-        if(idx > -1) {
-            const livePrice = player.inventory[idx].baseP * currentMultiplier;
-            player.balance += livePrice; player.inventory.splice(idx, 1);
-            saveGame(); showToast(`ĐÃ BÁN:<br>${item.n}`, cUP);
-        } else { showToast('BẠN CHƯA CÓ<br>MÓN ĐỒ NÀY!', cDOWN); }
+        if(idx > -1) { const livePrice = player.inventory[idx].baseP * currentMultiplier; player.balance += livePrice; player.inventory.splice(idx, 1); saveGame(); showToast(`ĐÃ BÁN:<br>${item.n}`, cUP); } else { showToast('BẠN CHƯA CÓ<br>MÓN ĐỒ NÀY!', cDOWN); }
     }
 
-    updateHeaderBalance(); renderHome(); renderTradeMarket();
+    // INIT
+    updateSoundIcon(); updateHeaderBalance(); renderHome(); renderTradeMarket();
 </script>
 </body>
 </html>
