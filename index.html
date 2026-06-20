@@ -135,7 +135,7 @@
         .daily-reward { font-size: 14px; color: var(--up); font-weight: 700;}
         .daily-today { border-color: var(--t5); background: rgba(255, 215, 0, 0.15); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); transform: scale(1.05); z-index: 2;}
         .daily-today .daily-day { color: var(--t5); }
-        .daily-claimed::after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; font-size: 30px; color: rgba(57, 255, 20, 0.3); }
+        .daily-claimed::after { content: '00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; font-size: 30px; color: rgba(57, 255, 20, 0.3); }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: none; flex-direction: column; z-index: 100; padding: 20px; justify-content: center; transition: opacity 0.3s;}
         .modal.show { display: flex; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -274,6 +274,7 @@
         <button class="pixel-btn" style="width: 100%; margin-top: 35px; border-color: rgba(255,0,60,0.3); color: var(--down); background: rgba(255,0,60,0.05);" onclick="resetGame()" data-i18n="btn_reset">XÓA DỮ LIỆU CHƠI</button>
     </div>
 
+    <!-- MODALS -->
     <div class="modal" id="daily-login-modal">
         <div class="modal-box" style="text-align: center;">
             <div class="modal-header" style="justify-content: center; border-bottom: none;"><span style="color:var(--t5); font-size: 22px;" data-i18n="modal_daily_title">🎁 ĐIỂM DANH HÀNG NGÀY 🎁</span></div>
@@ -555,7 +556,6 @@
         {n:"★ Karambit Fade", p:8000, t:5},{n:"★ Butterfly", p:10000, t:5},{n:"★ M9 Bayonet", p:9500, t:5},{n:"★ Gloves Vice", p:15000, t:5},{n:"★ AWP Gungnir", p:25000, t:5}
     ];
     const tWeights = {1: 70, 2: 20, 3: 8, 4: 1.5, 5: 0.5};
-    const caseNames = ["Chroma", "Gamma", "Spectrum", "Clutch", "Danger Zone", "Prisma", "Fracture", "Snakebite", "Dreams", "Recoil", "Revolution", "CS20", "Horizon", "Glove", "Shadow", "Falchion", "Huntsman", "Winter", "Bravo", "Weapon 1"];
     const casesDB = caseNames.map((name, i) => {
         const pool = [];
         for(let t=1; t<=5; t++) {
@@ -567,6 +567,8 @@
         return { id: 'c' + i, name: 'HÒM ' + name.toUpperCase(), price: price, color: (i % 2 === 0 ? '#aaa' : '#fff'), pool: pool };
     });
     const marketItemsDB = rawItems.map(item => ({ id: 'item_' + item.n.replace(/\s/g, ''), n: item.n, c: tColors[item.t], baseP: item.p, t: item.t, multiplier: 1.0, volatility: (Math.random() * 0.04) + 0.01 }));
+    
+    // TỐI ƯU 3: Tạo Map marketByName cho O(1) Lookup
     const marketByName = new Map(marketItemsDB.map(m => [m.n, m]));
 
     const questsDB = [
@@ -602,9 +604,9 @@
     if(!player.dailyStats) player.dailyStats = { cases: 0, sell: 0, covert: 0, highcase: 0 };
     if(player.level === undefined) player.level = 1; if(player.xp === undefined) player.xp = 0;
     if(!player.achievementsUnlocked) player.achievementsUnlocked = []; if(!player.loginStreak) player.loginStreak = { count: 0, lastDate: null };
+    
+    // VÁ LỖI BUG RECODRS THEO YÊU CẦU:
     if(!player.records) player.records = { maxBalance: player.balance, maxInvValue: 0, bestItemName: '', bestItemValue: 0, maxCaseOpened: 0 };
-    if(player.soundMuted !== undefined) { player.audio = { sfxVolume: 0.7, musicVolume: 0.4, sfxMuted: player.soundMuted, musicMuted: player.soundMuted }; delete player.soundMuted; }
-    if(!player.audio) player.audio = { sfxVolume: 0.7, musicVolume: 0.4, sfxMuted: false, musicMuted: false };
 
     const today = new Date(); const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
     if(player.lastDailyReset !== todayStr) { player.dailyStats = { cases: 0, sell: 0, covert: 0, highcase: 0 }; const dailyIds = questsDB.filter(q => q.type === 'daily').map(q => q.id); player.questClaimed = player.questClaimed.filter(id => !dailyIds.includes(id)); player.lastDailyReset = todayStr; saveGame(); }
@@ -615,7 +617,7 @@
     applyStaticLanguage();
 
     // ==========================================
-    // LEVEL & XP
+    // LEVEL & XP (TỐI ƯU 1: BỎ SAVE GAME DƯ THỪA)
     // ==========================================
     function xpForLevel(level) { return Math.floor(80 * Math.pow(level, 1.4)); }
     function getRankName(level) { if(level <= 4) return t('r1'); if(level <= 9) return t('r2'); if(level <= 19) return t('r3'); if(level <= 29) return t('r4'); if(level <= 49) return t('r5'); return t('r6'); }
@@ -623,8 +625,12 @@
     
     function addXP(amount) { 
         player.xp += amount; 
-        while(player.xp >= xpForLevel(player.level)) { player.xp -= xpForLevel(player.level); player.level++; onLevelUp(); } 
-        updateLevelUI();
+        while(player.xp >= xpForLevel(player.level)) { 
+            player.xp -= xpForLevel(player.level); 
+            player.level++; 
+            onLevelUp(); 
+        } 
+        updateLevelUI(); // Không tự gọi saveGame() nữa theo Yêu cầu 1
     }
 
     function updateLevelUI() {
@@ -656,27 +662,41 @@
 
     function getDaysDiff(date1Str, date2Str) { if(!date1Str) return 999; const d1 = new Date(date1Str); const d2 = new Date(date2Str); return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24)); }
     const dailyRewards = [50, 100, 150, 250, 400, 600, 1000];
-    
+
+    // TỐI ƯU 1: Thứ tự xử lý hàm điểm danh hằng ngày
     function claimDailyLogin() {
         let cycleIndex = (player.loginStreak.count - 1) % 7; let reward = dailyRewards[cycleIndex];
+        // a. Thay đổi dữ liệu
         player.balance += reward; player.loginStreak.lastDate = todayStr; 
-        checkAchievements(); saveGame(); 
+        // b. addXP (không có)
+        // c. checkAchievements
+        checkAchievements(); 
+        // d. saveGame duy nhất
+        saveGame(); 
+        // e. UI updates
         document.getElementById('daily-login-modal').style.display = 'none'; showToast(`${t('t_daily')} +${reward}$`, cUP);
     }
 
+    // TỐI ƯU 3: Sử dụng Map cho getLivePrice
     function getLivePrice(itemName, baseP) { let mItem = marketByName.get(itemName); return mItem ? baseP * mItem.multiplier : baseP; }
 
     function addHistory(caseName, itemName, color, value) { let now = new Date(); let timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} - ${now.getDate()}/${now.getMonth()+1}`; player.history.unshift({time: timeStr, cName: caseName, iName: itemName, color: color, val: value}); if(player.history.length > 100) player.history.pop(); }
     
+    // TỐI ƯU 3: Sử dụng Map để tránh tìm kiếm O(N) lồng trong reduce
     function checkRecordsBalance() { 
         if(player.balance > player.records.maxBalance) { player.records.maxBalance = player.balance; } 
-        let invVal = player.inventory.reduce((sum, i) => { let mItem = marketByName.get(i.n); return sum + (i.baseP * (mItem ? mItem.multiplier : 1.0)); }, 0); 
+        let invVal = player.inventory.reduce((sum, i) => {
+            let mItem = marketByName.get(i.n);
+            return sum + (i.baseP * (mItem ? mItem.multiplier : 1.0));
+        }, 0); 
         if(invVal > player.records.maxInvValue) player.records.maxInvValue = invVal; 
         checkAchievements(); 
     }
 
+    // TỐI ƯU 2: Tối ưu hóa render qua mô hình htmlParts.join() mượt mà hơn
     function renderHome() {
-        const container = document.getElementById('case-container'); let htmlParts = [];
+        const container = document.getElementById('case-container'); 
+        let htmlParts = [];
         casesDB.forEach(c => {
             let totalWeight = c.pool.reduce((s, p) => s + p.w, 0); let barHtml = ''; let maxTier = 1;
             [...c.pool].sort((a,b) => a.t - b.t).forEach(p => { 
@@ -689,17 +709,24 @@
         container.innerHTML = htmlParts.join('');
     }
 
-    function openRatesModal(caseId) {
+    // TỐI ƯU 2: openRatesModal mảng htmlParts
+    function getPityAdjustedPool(basePool, pityCount) { if (pityCount < 50) return basePool; let boost = (pityCount - 50) * 0.15; return basePool.map(item => { if (item.t >= 4) return { ...item, w: item.w + boost }; return item; }); }
+function weightedPick(pool) { const total = pool.reduce((sum, p) => sum + p.w, 0); let rand = Math.random() * total, cum = 0; for (const p of pool) { cum += p.w; if (rand <= cum) return p; } return pool[pool.length - 1]; }
+function weightedPickPity(pool, pityCount) { return weightedPick(getPityAdjustedPool(pool, pityCount)); }
+
+function openRatesModal(caseId) {
         const c = casesDB.find(x => x.id === caseId); const list = document.getElementById('rates-list'); const pityCount = player.pityCounter[caseId] || 0;
         document.getElementById('pity-bar').style.width = Math.min((pityCount / 50) * 100, 100) + '%'; document.getElementById('pity-text').innerText = `${pityCount} / 50`;
         let totalWeight = c.pool.reduce((s, p) => s + p.w, 0); let sortedPool = [...c.pool].sort((a,b) => b.w - a.w);
         
         let htmlParts = [];
         sortedPool.forEach(item => { let percent = (item.w / totalWeight * 100).toFixed(2); htmlParts.push(`<div class="rate-item"><span style="color: ${item.c}">${item.n}</span><span class="num-font">${percent}%</span></div>`); });
-        list.innerHTML = htmlParts.join(''); document.getElementById('rates-modal').style.display = 'flex';
+        list.innerHTML = htmlParts.join('');
+        document.getElementById('rates-modal').style.display = 'flex';
     }
     function closeRatesModal() { document.getElementById('rates-modal').style.display = 'none'; }
 
+    // TỐI ƯU 2: checkDailyLogin mảng htmlParts
     function checkDailyLogin() {
         let diff = getDaysDiff(player.loginStreak.lastDate, todayStr); if(diff === 0) return; 
         if(diff === 1) player.loginStreak.count++; else player.loginStreak.count = 1; 
@@ -711,10 +738,54 @@
             let statusClass = ""; if(i < cycleIndex) statusClass = "daily-claimed"; else if (i === cycleIndex) statusClass = "daily-today";
             htmlParts.push(`<div class="daily-item ${statusClass}"><div class="daily-day">${t('day')} ${i+1}</div><div class="daily-reward num-font">${dailyRewards[i]}$</div></div>`);
         }
-        grid.innerHTML = htmlParts.join(''); document.getElementById('daily-login-modal').style.display = 'flex';
+        grid.innerHTML = htmlParts.join('');
+        document.getElementById('daily-login-modal').style.display = 'flex';
     }
 
-    function endGachaAnimation() {
+    // TỐI ƯU 1: endGachaAnimation sắp xếp chuẩn dữ liệu -> XP -> Achiev -> Save -> UI
+    let spinTimeoutId, tickIntervalId, currentGachaSession = null;
+function startGacha(caseId, amount) {
+    const c = casesDB.find(x => x.id === caseId); const totalCost = c.price * amount;
+    if (player.balance < totalCost) { showToast(t('err_money'), cDOWN); return; }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const cardEl = document.getElementById(`card-${caseId}`); cardEl.classList.add('shaking'); setTimeout(() => cardEl.classList.remove('shaking'), 400);
+
+    setTimeout(() => {
+        player.balance -= totalCost; player.casesOpened += amount; player.dailyStats.cases += amount;
+        if(c.price > 500) player.dailyStats.highcase++; if(c.price > player.records.maxCaseOpened) { player.records.maxCaseOpened = c.price; showToast(`${t('record_case')} (${c.price}$)`, 'var(--t5)'); }
+        updateHeaderBalance();
+
+        let pCount = player.pityCounter[caseId] || 0; let pulledResults = []; let highestItem = null;
+        for(let i=0; i<amount; i++) {
+            let item = weightedPickPity(c.pool, pCount); pulledResults.push(item);
+            if(item.t >= 4) { pCount = 0; player.stats.covert++; player.dailyStats.covert++; } else pCount++;
+            if(!highestItem || item.t > highestItem.t) highestItem = item;
+        }
+        player.pityCounter[caseId] = pCount; currentGachaSession = { pulledResults, amount, c };
+
+        const modal = document.getElementById('gacha-modal'); const strip = document.getElementById('roller-strip'); const btnSkip = document.getElementById('btn-skip-gacha'); const btnClose = document.getElementById('btn-close-gacha'); const title = document.getElementById('gacha-title');
+        title.className = "gacha-title"; modal.style.boxShadow = "none"; document.getElementById('gacha-roller').style.borderColor = "var(--glass-border)"; document.getElementById('gacha-roller').style.boxShadow = "none";
+
+        document.getElementById('gacha-roller').style.display = 'flex'; document.getElementById('x10-result-grid').style.display = 'none';
+        title.innerText = amount === 1 ? t('gacha_rolling') : t('gacha_rolling_10'); title.style.color = "white"; title.style.textShadow = "none";
+        btnSkip.style.display = 'block'; btnClose.style.display = 'none'; strip.style.transition = 'none'; strip.style.transform = 'translateX(0)';
+
+        let html = ''; const winningIndex = 50; const itemWidth = 120;
+        for(let i=0; i<60; i++) { let temp = (i === winningIndex) ? highestItem : weightedPickPity(c.pool, pCount); html += `<div class="roller-item" style="border-bottom: 4px solid ${temp.c}; color: ${temp.c}; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, ${hexToRgba(temp.c, 0.2)} 100%); box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">${temp.n}</div>`; }
+        strip.innerHTML = html; modal.style.display = 'flex';
+
+        setTimeout(() => {
+            const stopPosition = (winningIndex * itemWidth) + (itemWidth / 2) - (window.innerWidth / 2) + (Math.floor(Math.random() * 80) - 40);
+            strip.style.transition = 'transform 6s cubic-bezier(0.15, 0.9, 0.15, 1)'; strip.style.transform = `translateX(-${stopPosition}px)`;
+            let ticks = 0; tickIntervalId = setInterval(() => { ticks++; if(ticks < 40) playTick(); else clearInterval(tickIntervalId); }, 100);
+            spinTimeoutId = setTimeout(() => { endGachaAnimation(); }, 6200);
+        }, 50); 
+    }, 400); 
+}
+
+function skipGachaAnimation() { if(!currentGachaSession) return; clearTimeout(spinTimeoutId); clearInterval(tickIntervalId); document.getElementById('roller-strip').style.transition = 'none'; endGachaAnimation(); }
+
+function endGachaAnimation() {
         const { pulledResults, amount, c } = currentGachaSession; const title = document.getElementById('gacha-title'); const modal = document.getElementById('gacha-modal');
         document.getElementById('btn-skip-gacha').style.display = 'none'; document.getElementById('btn-close-gacha').style.display = 'block';
 
@@ -722,6 +793,7 @@
 
         let totalLiveVal = 0; let highestTier = 1; let totalXP = 0; const xpMap = {1:5, 2:15, 3:40, 4:120, 5:400};
         
+        // a. Thực hiện hết các thay đổi dữ liệu
         pulledResults.forEach(item => {
             player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.p, t: item.t });
             let liveVal = getLivePrice(item.n, item.p); totalLiveVal += liveVal; addHistory(c.name, item.n, item.c, liveVal);
@@ -731,7 +803,15 @@
             totalXP += xpMap[item.t] || 0; 
         });
         
-        addXP(totalXP); checkAchievements(); saveGame(); checkQuestsSilent();
+        // b. Gọi addXP
+        addXP(totalXP); 
+        // c. Gọi checkAchievements
+        checkAchievements();
+        // d. Gọi saveGame duy nhất
+        saveGame(); 
+
+        // e. Các hàm UI
+        checkQuestsSilent();
 
         if(highestTier === 4) { title.classList.add('glow-epic-4'); modal.style.boxShadow = "inset 0 0 100px rgba(235, 75, 75, 0.3)"; document.getElementById('gacha-roller').style.borderColor = "var(--t4)"; document.getElementById('gacha-roller').style.boxShadow = "0 0 30px rgba(235, 75, 75, 0.4)";}
         if(highestTier === 5) { title.classList.add('glow-epic-5'); modal.style.boxShadow = "inset 0 0 150px rgba(255, 215, 0, 0.3)"; document.getElementById('gacha-roller').style.borderColor = "var(--t5)"; document.getElementById('gacha-roller').style.boxShadow = "0 0 40px rgba(255, 215, 0, 0.5)";}
@@ -740,6 +820,8 @@
             let item = pulledResults[0]; title.innerHTML = `${t('gacha_got')}<br><span style="font-size: 32px">${item.n}</span>`; title.style.color = item.c; title.style.textShadow = `0 0 15px ${item.c}`;
         } else {
             document.getElementById('gacha-roller').style.display = 'none'; const grid = document.getElementById('x10-result-grid'); grid.style.display = 'grid'; 
+            
+            // TỐI ƯU 2: grid x10 dùng htmlParts
             let x10Parts = [];
             pulledResults.forEach(item => { x10Parts.push(`<div class="x10-item" style="color: ${item.c}; border-color: ${item.c}; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, ${hexToRgba(item.c, 0.25)} 100%);">${item.n}</div>`); });
             grid.innerHTML = x10Parts.join('');
@@ -749,6 +831,7 @@
         currentGachaSession = null;
     }
 
+    // TỐI ƯU 2: renderTradeMarket mảng htmlParts
     function renderTradeMarket() {
         tradeSortMode = document.getElementById('trade-sort').value; let sortedMarket = [...marketItemsDB];
         if (tradeSortMode === 'price-desc') sortedMarket.sort((a,b) => (b.baseP*b.multiplier) - (a.baseP*a.multiplier));
@@ -765,6 +848,7 @@
         document.getElementById('trade-search').dispatchEvent(new Event('input'));
     }
 
+    // TỐI ƯU 2: renderBackpack mảng htmlParts
     function renderBackpack() {
         let sortMode = document.getElementById('bp-sort').value; let sortedInv = [...player.inventory];
         if (sortMode === 'price-desc') sortedInv.sort((a,b) => getLivePrice(b.n, b.baseP) - getLivePrice(a.n, a.baseP));
@@ -778,38 +862,62 @@
             const livePrice = getLivePrice(item.n, item.baseP);
             htmlParts.push(`<div class="item-card" style="background: linear-gradient(180deg, rgba(20,22,30,0.6) 0%, ${hexToRgba(item.c, 0.1)} 100%); box-shadow: 0 4px 15px ${hexToRgba(item.c, 0.05)}, inset 0 2px 0 ${item.c};"><div class="item-name" style="color: ${item.c}">${item.n}</div><div class="item-price num-font" id="bp-p-${item.id}">${livePrice.toFixed(2)}$</div><button class="pixel-btn" style="margin-top:8px; padding: 6px; font-size:13px; background: rgba(0,0,0,0.4);" onclick="sellBackpackItem(${item.id})">${t('btn_sell')}</button></div>`);
         });
-        container.innerHTML = htmlParts.join(''); updateBackpackPrices(); 
+        container.innerHTML = htmlParts.join('');
+        updateBackpackPrices(); 
     }
 
+    // TỐI ƯU 1: sellBackpackItem sắp xếp chuẩn
     function sellBackpackItem(id) {
         const idx = player.inventory.findIndex(i => i.id === id);
         if (idx > -1) { 
             const livePrice = getLivePrice(player.inventory[idx].n, player.inventory[idx].baseP); 
+            // a. Thay đổi dữ liệu
             player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; player.inventory.splice(idx, 1); 
-            addXP(2); checkAchievements(); saveGame(); 
+            // b. Gọi addXP
+            addXP(2); 
+            // c. Gọi checkAchievements
+            checkAchievements();
+            // d. Gọi saveGame duy nhất
+            saveGame(); 
+            // e. UI Updates
             renderBackpack(); showToast(`${t('t_sell')} +${livePrice.toFixed(2)}$`, cUP); checkQuestsSilent(); 
         }
     }
 
+    // TỐI ƯU 1: confirmSell sắp xếp chuẩn
     function confirmSell() {
         let totalEarned = 0; let itemsSold = 0;
         player.inventory = player.inventory.filter(item => { if(pendingSellIds.includes(item.id)) { totalEarned += getLivePrice(item.n, item.baseP); itemsSold++; return false; } return true; });
+        // a. Thay đổi dữ liệu
         player.balance += totalEarned; player.stats.sell += itemsSold; player.dailyStats.sell += itemsSold; 
-        addXP(itemsSold * 2); checkAchievements(); saveGame(); 
+        // b. Gọi addXP
+        addXP(itemsSold * 2); 
+        // c. Gọi checkAchievements
+        checkAchievements();
+        // d. Gọi saveGame duy nhất
+        saveGame(); 
+        // e. UI Updates
         document.getElementById('sell-confirm-modal').style.display = 'none'; renderBackpack(); showToast(`${t('t_sell_all')} +${totalEarned.toFixed(2)}$`, cUP); checkQuestsSilent(); 
     }
 
+    // TỐI ƯU 2: renderHistory mảng htmlParts
     function renderHistory() {
         const container = document.getElementById('history-container'); 
         if(player.history.length === 0) { container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-clock-rotate-left"></i><p data-i18n="empty_history">${t('empty_history')}</p></div>`; return; }
+        
         let htmlParts = [];
         player.history.forEach(log => { htmlParts.push(`<div class="history-item"><div style="display:flex; flex-direction:column; gap:4px;"><div class="history-time"><i class="fa-regular fa-clock" style="margin-right:4px;"></i>${log.time} &bull; ${log.cName}</div><div style="color: ${log.color}; font-weight: 700; font-size: 15px;">${log.iName}</div></div><div class="num-font" style="color: #fff; font-size:16px;">${log.val.toFixed(2)}$</div></div>`); });
         container.innerHTML = htmlParts.join('');
     }
 
+    // TỐI ƯU 2: renderQuests mảng htmlParts riêng rẽ
     function renderQuests() {
-        const dailyContainer = document.getElementById('quest-daily-container'); const onceContainer = document.getElementById('quest-once-container'); 
-        let dailyParts = []; let onceParts = [];
+        const dailyContainer = document.getElementById('quest-daily-container'); 
+        const onceContainer = document.getElementById('quest-once-container'); 
+        
+        let dailyParts = [];
+        let onceParts = [];
+        
         questsDB.forEach((q) => {
             let isClaimed = player.questClaimed.includes(q.id); let currentProg = getQuestProgress(q); let progPercent = Math.min((currentProg / q.target) * 100, 100);
             let titleText = t(q.tKey).replace('{n}', q.target);
@@ -817,23 +925,35 @@
             let html = `<div class="quest-card"><div class="quest-info"><div class="quest-title" style="${isClaimed ? 'color:rgba(255,255,255,0.3)' : ''}">${titleText}</div><div style="width:100%; height:6px; background:rgba(0,0,0,0.5); border-radius:3px; overflow:hidden;"><div style="height:100%; background:${isClaimed ? '#555' : 'var(--up)'}; width:${progPercent}%"></div></div></div><div>${btnHTML}</div></div>`;
             if(q.type === 'daily') dailyParts.push(html); else onceParts.push(html);
         });
-        dailyContainer.innerHTML = dailyParts.join(''); onceContainer.innerHTML = onceParts.join('');
+        dailyContainer.innerHTML = dailyParts.join('');
+        onceContainer.innerHTML = onceParts.join('');
     }
 
+    // TỐI ƯU 1: claimQuest sắp xếp chuẩn
     function claimQuest(qid, reward) { 
         if (!player.questClaimed.includes(qid)) { 
-            player.questClaimed.push(qid); player.balance += reward; addXP(Math.floor(reward * 0.3)); checkAchievements(); saveGame(); 
-            renderQuests(); showToast(`${t('t_claim')} +${reward}$`, cUP); playClaim(); 
+            // a. Thay đổi dữ liệu
+            player.questClaimed.push(qid); player.balance += reward; 
+            // b. Gọi addXP
+            addXP(Math.floor(reward * 0.3)); 
+            // c. Gọi checkAchievements
+            checkAchievements();
+            // d. Gọi saveGame duy nhất
+            saveGame(); 
+            // e. UI Updates
+            renderQuests(); showToast(`${t('t_claim')} +${reward}$`, cUP); 
         } 
     }
 
+    // TỐI ƯU 2: renderProfile mảng mạng lưới thành tựu htmlParts
     function renderProfile() {
         document.getElementById('prof-balance').innerText = player.balance.toFixed(2) + '$'; document.getElementById('prof-cases').innerText = player.casesOpened;
         let invVal = player.inventory.reduce((sum, i) => sum + getLivePrice(i.n, i.baseP), 0); document.getElementById('prof-inv-value').innerText = invVal.toFixed(2) + '$';
         document.getElementById('rec-balance').innerText = player.records.maxBalance.toFixed(2) + '$'; document.getElementById('rec-inv').innerText = player.records.maxInvValue.toFixed(2) + '$';
         document.getElementById('rec-item-val').innerText = player.records.bestItemValue.toFixed(2) + '$'; document.getElementById('rec-item-name').innerText = player.records.bestItemName || t('none');
         
-        const grid = document.getElementById('achievements-grid'); let htmlParts = [];
+        const grid = document.getElementById('achievements-grid'); 
+        let htmlParts = [];
         achievementsDB.forEach(a => {
             let isUnlocked = player.achievementsUnlocked.includes(a.id); let prog = Math.min(getAchievementProgress(a.cond), a.target);
             let classLocked = isUnlocked ? "" : "achieve-locked"; let progText = isUnlocked ? t('a_unlocked') : `${Math.floor(prog)}/${a.target}`;
@@ -842,21 +962,64 @@
         grid.innerHTML = htmlParts.join('');
     }
 
+    // TỐI ƯU 1: buyMarketItem sắp xếp chuẩn
     function buyMarketItem(item) {
         const livePrice = item.baseP * item.multiplier;
         if(player.balance >= livePrice) { 
+            // a. Thay đổi dữ liệu
             player.balance -= livePrice; player.stats.buy++; player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP, t: item.t }); 
-            addXP(2); checkAchievements(); saveGame(); showToast(`${t('t_buy')} <br>${item.n}`, cUP); checkQuestsSilent(); 
+            // b. Gọi addXP
+            addXP(2); 
+            // c. Gọi checkAchievements
+            checkAchievements();
+            // d. Gọi saveGame duy nhất
+            saveGame(); 
+            // e. UI Updates
+            showToast(`${t('t_buy')} <br>${item.n}`, cUP); checkQuestsSilent(); 
         } else { showToast(t('err_money'), cDOWN); }
     }
 
+    // TỐI ƯU 1: sellMarketItem sắp xếp chuẩn
     function sellMarketItem(item) {
         const idx = player.inventory.findIndex(i => i.n === item.n);
         if(idx > -1) { 
             const livePrice = getLivePrice(player.inventory[idx].n, player.inventory[idx].baseP); 
+            // a. Thay đổi dữ liệu
             player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; player.inventory.splice(idx, 1); 
-            addXP(2); checkAchievements(); saveGame(); showToast(`${t('t_sell')} <br>${item.n}`, cUP); checkQuestsSilent(); 
+            // b. Gọi addXP
+            addXP(2); 
+            // c. Gọi checkAchievements
+            checkAchievements();
+            // d. Gọi saveGame duy nhất
+            saveGame(); 
+            // e. UI Updates
+            showToast(`${t('t_sell')} <br>${item.n}`, cUP); checkQuestsSilent(); 
         } else { showToast(t('err_no_item'), cDOWN); }
+    }
+
+    Chart.defaults.font.family = "'Sora', sans-serif"; Chart.defaults.color = "#aaaaaa";
+    let modalChartInstance = null; let currentActiveTradeItem = null;
+
+    function drawChart(item) {
+        const ctx = document.getElementById('itemChart').getContext('2d'); const itemHistory = marketHistory[item.n].map(m => m * item.baseP);
+        if (modalChartInstance) modalChartInstance.destroy();
+        modalChartInstance = new Chart(ctx, { type: 'line', data: { labels: Array(30).fill(''), datasets: [{ data: itemHistory, borderColor: item.c, borderWidth: 3, tension: 0.4, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, scales: { x: { display: false }, y: { position: 'right', grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { font: { size: 12 } } } }, plugins: { legend: { display: false }, tooltip: { enabled: false } } } });
+    }
+
+    function openTradeModal(itemId) {
+        currentActiveTradeItem = marketItemsDB.find(i => i.id === itemId);
+        document.getElementById('modal-item-name').innerText = currentActiveTradeItem.n; document.getElementById('modal-item-name').style.color = currentActiveTradeItem.c;
+        const modal = document.getElementById('trade-modal'); modal.style.display = 'flex';
+        requestAnimationFrame(() => { modal.classList.add('show'); drawChart(currentActiveTradeItem); updateModalLivePrice(); });
+        document.getElementById('btn-modal-buy').onclick = () => buyMarketItem(currentActiveTradeItem); document.getElementById('btn-modal-sell').onclick = () => sellMarketItem(currentActiveTradeItem);
+    }
+    function closeModal() { document.getElementById('trade-modal').classList.remove('show'); setTimeout(() => { document.getElementById('trade-modal').style.display = 'none'; currentActiveTradeItem = null; }, 200); }
+    
+    function updateModalLivePrice() {
+        if(!currentActiveTradeItem) return;
+        const livePrice = currentActiveTradeItem.baseP * currentActiveTradeItem.multiplier;
+        updatePriceWithFX(document.getElementById('modal-item-price'), livePrice);
+        if(modalChartInstance) { const itemHistory = marketHistory[currentActiveTradeItem.n].map(m => m * currentActiveTradeItem.baseP); modalChartInstance.data.datasets[0].data = itemHistory; modalChartInstance.data.datasets[0].borderColor = itemHistory[29] >= itemHistory[28] ? cUP : cDOWN; modalChartInstance.update(); }
     }
 
     updateSoundIcon(); syncSettingsUI(); updateLevelUI(); updateHeaderBalance(); renderHome(); renderTradeMarket();
