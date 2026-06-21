@@ -8,7 +8,7 @@
     
     <title>Gacha & Market Simulator</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Sora:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=Inter:wght@600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -18,13 +18,12 @@
             --glass-border: rgba(255, 255, 255, 0.08); --glass-blur: blur(12px);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Rajdhani', sans-serif; }
-        .num-font { font-family: 'Sora', sans-serif; font-weight: 600; letter-spacing: -0.5px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Be Vietnam Pro', sans-serif; }
+        .num-font { font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: -0.5px; }
 
         body { 
             background: radial-gradient(circle at 50% 0%, rgba(136, 71, 255, 0.15) 0%, transparent 50%), linear-gradient(180deg, #0a0e17 0%, var(--bg-dark) 100%);
-            background-attachment: fixed;
-            color: var(--primary); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
+            background-attachment: fixed; color: var(--primary); height: 100dvh; display: flex; flex-direction: column; overflow: hidden; 
         }
 
         @keyframes slideFadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -42,8 +41,7 @@
         .glow-epic-5 { animation: epicGlowT5 1.5s ease-in-out; }
 
         .pixel-btn { 
-            background: rgba(255,255,255,0.05); color: var(--primary); 
-            border: 1px solid var(--glass-border); border-radius: 10px; 
+            background: rgba(255,255,255,0.05); color: var(--primary); border: 1px solid var(--glass-border); border-radius: 10px; 
             padding: 10px; font-size: 16px; font-weight: 700; cursor: pointer; text-transform: uppercase; 
             transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); text-align: center;
             backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
@@ -65,11 +63,7 @@
         .screen.active { display: block; animation: slideFadeUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         .case-list { display: flex; flex-direction: column; gap: 15px; }
-        .case-card { 
-            background: var(--bg-panel); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border); border-radius: 16px; 
-            padding: 18px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; 
-        }
+        .case-card { background: var(--bg-panel); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden; }
         .case-card.shaking { animation: shake 0.4s ease-in-out; background: rgba(255,255,255,0.05); }
         .case-tier-icon { position: absolute; top: -15px; right: -10px; font-size: 80px; opacity: 0.08; transform: rotate(15deg); pointer-events: none;}
         .case-title { font-size: 22px; font-weight: 700; z-index: 1; text-align: left; letter-spacing: 1px;}
@@ -83,17 +77,12 @@
         .btn-x10 { flex: 2; background: linear-gradient(135deg, rgba(211,44,230,0.8), rgba(136,71,255,0.8)); color: #fff; font-size: 15px; padding: 10px; border: none;}
 
         .toolbar { display: flex; gap: 10px; margin-bottom: 15px; }
-        .toolbar input, .toolbar select { background: rgba(0,0,0,0.4); color: #fff; border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px; font-size: 14px; outline: none; font-family: 'Rajdhani', sans-serif; font-weight: 600; transition: 0.2s;}
+        .toolbar input, .toolbar select { background: rgba(0,0,0,0.4); color: #fff; border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px; font-size: 14px; outline: none; font-family: 'Be Vietnam Pro', sans-serif; font-weight: 600; transition: 0.2s;}
         .toolbar input:focus, .toolbar select:focus { border-color: var(--t1); box-shadow: 0 0 10px rgba(75,105,255,0.3);}
         .toolbar input { flex: 2; } .toolbar select { flex: 1; }
 
         .grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .item-card { 
-            background: var(--bg-panel); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border); border-radius: 14px; 
-            padding: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; 
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden;
-        }
+        .item-card { background: var(--bg-panel); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden;}
         .item-name { font-size: 15px; font-weight: 600; line-height: 1.3; z-index: 1; }
         .item-price { font-size: 16px; transition: color 0.2s; z-index: 1; }
 
@@ -178,7 +167,6 @@
         .intro-title { font-size: 50px; font-weight: 700; text-align: center; letter-spacing: 2px; text-shadow: 0 0 30px rgba(255,215,0,0.4); margin-bottom: 50px; animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .intro-btn { background: linear-gradient(135deg, var(--t5), #ff8800); color: #000; font-size: 20px; padding: 16px 40px; border-radius: 30px; border: none; box-shadow: 0 10px 20px rgba(255,170,0,0.3); animation: slideFadeUp 1s ease-out 0.3s both; }
         .intro-btn:active { transform: scale(0.95); box-shadow: 0 5px 10px rgba(255,170,0,0.3); }
-
     </style>
 </head>
 <body>
@@ -377,7 +365,7 @@
     // ==========================================
     const i18n = {
         vi: {
-            store: "CỬA HÀNG", market: "SÀN GIAO DỊCH", backpack: "KHO ĐỒ", history: "LỊCH SỬ", quest: "NHIỆM VỤ", profile: "HỒ SƠ",
+            store: "CỬA HÀNG", market: "SÀN GIAO DỊCH", backpack: "KHO ĐỒ", history: "LỊCH SỬ QUAY", quest: "NHIỆM VỤ", profile: "HỒ SƠ CỦA BẠN",
             nav_home: "HOME", nav_trade: "TRADE", nav_backpack: "KHO ĐỒ", nav_history: "LỊCH SỬ", nav_quest: "NHIỆM VỤ", nav_profile: "HỒ SƠ",
             btn_rates: "TỈ LỆ", btn_open_x1: "MỞ x1", btn_open_x10: "MỞ x10", price: "Giá",
             search_placeholder: "🔍 Tìm kiếm vật phẩm...",
@@ -397,15 +385,12 @@
             btn_sell_now: "BÁN NGAY", btn_cancel: "HỦY BỎ",
             modal_trade_cur: "GIÁ HIỆN TẠI", btn_buy: "MUA VÀO", btn_sell_out: "BÁN RA",
             modal_settings: "CÀI ĐẶT", lbl_sfx: "Âm lượng Hiệu ứng (SFX)", lbl_bgm: "Âm lượng Nhạc nền (BGM)", lbl_lang: "Ngôn ngữ / Language",
-            gacha_rolling: "ĐANG QUAY...", gacha_rolling_10: "ĐANG QUAY x10...", btn_skip: "BỎ QUA HIỆU ỨNG", btn_continue: "TIẾP TỤC",
+            gacha_rolling: "ĐANG MỞ HÒM...", gacha_rolling_10: "ĐANG MỞ x10...", btn_skip: "BỎ QUA HIỆU ỨNG", btn_continue: "TIẾP TỤC",
             gacha_got: "VẬT PHẨM NHẬN ĐƯỢC:", gacha_got_10: "MỞ THÀNH CÔNG x10", gacha_total: "Tổng Giá TT:",
-            // Toasts
             err_money: "KHÔNG ĐỦ TIỀN MẶT!", record_case: "🏆 KỶ LỤC: Hòm đắt nhất", record_item: "⭐ KỶ LỤC MỚI:",
             t_buy: "ĐÃ MUA:", t_sell: "ĐÃ BÁN:", err_no_item: "BẠN CHƯA CÓ<br>MÓN ĐỒ NÀY!", t_sell_all: "ĐÃ BÁN NHANH:", err_empty_sell: "KHÔNG TÌM THẤY VẬT PHẨM NÀO!",
             t_claim: "NHẬN THƯỞNG", t_achieve: "THÀNH TỰU:", t_daily: "ĐIỂM DANH:", t_levelup: "🎉 LÊN CẤP",
-            // Ranks
             r1: "Tập Sự", r2: "Thợ Săn Hòm", r3: "Nhà Giao Dịch", r4: "Thương Gia", r5: "Đại Gia", r6: "Huyền Thoại",
-            // Quests / Achieve logic strings
             qc_cases: "Mở {n} hòm", qc_bal: "Đạt số dư {n}$", qc_cov: "Mở trúng 1 đồ Đỏ/Vàng", 
             qd_cases: "Hằng Ngày: Mở {n} hòm", qd_sell: "Hằng Ngày: Bán {n} vật phẩm", qd_high: "Hằng Ngày: Mở 1 hòm > 500$",
             a_first: "Hòm đầu tay", a_noob: "Tay mơ", a_pro: "Chuyên gia mở hòm", a_rich: "Triệu phú", a_rare: "Săn đồ hiếm", a_leg: "Huyền thoại", a_trade: "Nhà giao dịch", a_streak: "Kiên trì",
@@ -458,20 +443,15 @@
             if (el.tagName === 'INPUT') el.placeholder = t(key);
             else el.innerText = t(key);
         });
-        
-        // Update language button text
         const btnLang = document.getElementById('btn-toggle-lang');
         if(btnLang) btnLang.innerText = player.language === 'vi' ? 'Tiếng Việt (VI)' : 'English (EN)';
     }
 
     function toggleLanguage() {
         player.language = player.language === 'vi' ? 'en' : 'vi';
-        saveGame();
-        applyStaticLanguage();
-        
+        saveGame(); applyStaticLanguage();
         renderHome(); renderTradeMarket(); renderBackpack(); renderQuests(); renderProfile(); renderHistory();
         updateLevelUI();
-        
         let activeTab = document.querySelector('.nav-item.active').getAttribute('data-target');
         switchTab(activeTab); 
     }
@@ -574,8 +554,7 @@
     });
     const marketItemsDB = rawItems.map(item => ({ id: 'item_' + item.n.replace(/\s/g, ''), n: item.n, c: tColors[item.t], baseP: item.p, t: item.t, multiplier: 1.0, volatility: (Math.random() * 0.04) + 0.01 }));
     const marketByName = new Map(marketItemsDB.map(m => [m.n, m]));
-    
-    // Đã thay đổi: Thêm tKey cho Quest và Achieve
+
     const questsDB = [
         { id: 'q1', type: 'once', cond: 'cases', target: 20, reward: 1500, tKey: 'qc_cases' }, { id: 'q2', type: 'once', cond: 'balance', target: 50000, reward: 5000, tKey: 'qc_bal' }, { id: 'q3', type: 'once', cond: 'covert', target: 1, reward: 10000, tKey: 'qc_cov' },
         { id: 'd1', type: 'daily', cond: 'cases', target: 5, reward: 500, tKey: 'qd_cases' }, { id: 'd2', type: 'daily', cond: 'sell', target: 10, reward: 800, tKey: 'qd_sell' }, { id: 'd3', type: 'daily', cond: 'highcase', target: 1, reward: 2000, tKey: 'qd_high' }
@@ -596,8 +575,7 @@
     // SAVE / STATE
     // ==========================================
     let defaultPlayer = { 
-        language: 'vi', // THAY ĐỔI: Thêm field ngôn ngữ
-        balance: 10000.00, casesOpened: 0, inventory: [], questClaimed: [], pityCounter: {}, history: [], 
+        language: 'vi', balance: 10000.00, casesOpened: 0, inventory: [], questClaimed: [], pityCounter: {}, history: [], 
         records: { maxBalance: 10000, maxInvValue: 0, bestItemName: "", bestItemValue: 0, maxCaseOpened: 0 }, 
         stats: { sell: 0, buy: 0, covert: 0, t4: 0, t5: 0 }, dailyStats: { cases: 0, sell: 0, covert: 0, highcase: 0 }, lastDailyReset: "",
         level: 1, xp: 0, achievementsUnlocked: [], loginStreak: { count: 0, lastDate: null },
@@ -605,33 +583,36 @@
     };
     let player = JSON.parse(localStorage.getItem('pixelGachaX')) || defaultPlayer;
     
-    if(!player.language) player.language = 'vi';
-    if(!player.stats) player.stats = { sell: 0, buy: 0, covert: 0, t4: 0, t5: 0 };
+    if(!player.language) player.language = 'vi'; if(!player.stats) player.stats = { sell: 0, buy: 0, covert: 0, t4: 0, t5: 0 };
     if(player.stats.buy === undefined) player.stats.buy = 0; if(player.stats.t4 === undefined) player.stats.t4 = 0; if(player.stats.t5 === undefined) player.stats.t5 = 0;
     if(!player.dailyStats) player.dailyStats = { cases: 0, sell: 0, covert: 0, highcase: 0 };
     if(player.level === undefined) player.level = 1; if(player.xp === undefined) player.xp = 0;
-    if(!player.achievementsUnlocked) player.achievementsUnlocked = [];
-    if(!player.loginStreak) player.loginStreak = { count: 0, lastDate: null };
+    if(!player.achievementsUnlocked) player.achievementsUnlocked = []; if(!player.loginStreak) player.loginStreak = { count: 0, lastDate: null };
     if(!player.records) player.records = { maxBalance: player.balance, maxInvValue: 0, bestItemName: '', bestItemValue: 0, maxCaseOpened: 0 };
-
     if(player.soundMuted !== undefined) { player.audio = { sfxVolume: 0.7, musicVolume: 0.4, sfxMuted: player.soundMuted, musicMuted: player.soundMuted }; delete player.soundMuted; }
     if(!player.audio) player.audio = { sfxVolume: 0.7, musicVolume: 0.4, sfxMuted: false, musicMuted: false };
-    
+
     const today = new Date(); const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
     if(player.lastDailyReset !== todayStr) { player.dailyStats = { cases: 0, sell: 0, covert: 0, highcase: 0 }; const dailyIds = questsDB.filter(q => q.type === 'daily').map(q => q.id); player.questClaimed = player.questClaimed.filter(id => !dailyIds.includes(id)); player.lastDailyReset = todayStr; saveGame(); }
 
     function saveGame() { localStorage.setItem('pixelGachaX', JSON.stringify(player)); updateHeaderBalance(); }
     function resetGame() { if(confirm(t('btn_reset') + "?")) { localStorage.removeItem('pixelGachaX'); location.reload(); } }
 
-    applyStaticLanguage(); // Gọi ngay sau khi có config language
+    applyStaticLanguage();
 
     // ==========================================
-    // CÁC HÀM TIỆN ÍCH & LOGIC CORE
+    // LEVEL & XP
     // ==========================================
     function xpForLevel(level) { return Math.floor(80 * Math.pow(level, 1.4)); }
     function getRankName(level) { if(level <= 4) return t('r1'); if(level <= 9) return t('r2'); if(level <= 19) return t('r3'); if(level <= 29) return t('r4'); if(level <= 49) return t('r5'); return t('r6'); }
     function onLevelUp() { let reward = player.level * 50; player.balance += reward; playEpic(); showToast(`${t('t_levelup')} ${player.level}! +${reward}$`, 'var(--t5)', true); }
-    function addXP(amount) { player.xp += amount; while(player.xp >= xpForLevel(player.level)) { player.xp -= xpForLevel(player.level); player.level++; onLevelUp(); } updateLevelUI(); }
+    
+    function addXP(amount) { 
+        player.xp += amount; 
+        while(player.xp >= xpForLevel(player.level)) { player.xp -= xpForLevel(player.level); player.level++; onLevelUp(); } 
+        updateLevelUI(); 
+    }
+
     function updateLevelUI() {
         let rank = getRankName(player.level); let req = xpForLevel(player.level); let pct = Math.min((player.xp / req) * 100, 100);
         let hl = document.getElementById('header-level'); if(hl) hl.innerText = t('prof_level').replace('{lvl}', player.level).replace('{rank}', rank);
@@ -672,6 +653,7 @@
 
     function getDaysDiff(date1Str, date2Str) { if(!date1Str) return 999; const d1 = new Date(date1Str); const d2 = new Date(date2Str); return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24)); }
     const dailyRewards = [50, 100, 150, 250, 400, 600, 1000];
+    
     function checkDailyLogin() {
         let diff = getDaysDiff(player.loginStreak.lastDate, todayStr); if(diff === 0) return; 
         if(diff === 1) player.loginStreak.count++; else player.loginStreak.count = 1; 
@@ -688,12 +670,21 @@
 
     function claimDailyLogin() {
         let cycleIndex = (player.loginStreak.count - 1) % 7; let reward = dailyRewards[cycleIndex];
-        player.balance += reward; player.loginStreak.lastDate = todayStr; checkAchievements(); saveGame(); document.getElementById('daily-login-modal').style.display = 'none'; showToast(`${t('t_daily')} +${reward}$`, cUP);
+        player.balance += reward; player.loginStreak.lastDate = todayStr; 
+        checkAchievements(); saveGame(); 
+        document.getElementById('daily-login-modal').style.display = 'none'; showToast(`${t('t_daily')} +${reward}$`, cUP);
     }
-    window.addEventListener('load', () => { checkDailyLogin(); });
+
+    function getLivePrice(itemName, baseP) { let mItem = marketByName.get(itemName); return mItem ? baseP * mItem.multiplier : baseP; }
 
     function addHistory(caseName, itemName, color, value) { let now = new Date(); let timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} - ${now.getDate()}/${now.getMonth()+1}`; player.history.unshift({time: timeStr, cName: caseName, iName: itemName, color: color, val: value}); if(player.history.length > 100) player.history.pop(); }
-    function checkRecordsBalance() { if(player.balance > player.records.maxBalance) { player.records.maxBalance = player.balance; } let invVal = player.inventory.reduce((sum, i) => { let mItem = marketByName.get(i.n); return sum + (i.baseP * (mItem ? mItem.multiplier : 1.0)); }, 0); if(invVal > player.records.maxInvValue) player.records.maxInvValue = invVal; checkAchievements(); }
+    
+    function checkRecordsBalance() { 
+        if(player.balance > player.records.maxBalance) { player.records.maxBalance = player.balance; } 
+        let invVal = player.inventory.reduce((sum, i) => { let mItem = marketByName.get(i.n); return sum + (i.baseP * (mItem ? mItem.multiplier : 1.0)); }, 0); 
+        if(invVal > player.records.maxInvValue) player.records.maxInvValue = invVal; 
+        checkAchievements(); 
+    }
 
     let marketHistory = {}; marketItemsDB.forEach(item => { marketHistory[item.n] = Array(30).fill(1.0); });
     for(let i=0; i<30; i++) { marketItemsDB.forEach(item => { item.multiplier *= (1 + ((Math.random() * (item.volatility * 2)) - item.volatility)); if (item.multiplier < 0.1) item.multiplier = 0.1; marketHistory[item.n].push(item.multiplier); marketHistory[item.n].shift(); }); }
@@ -704,10 +695,8 @@
         if(currentActiveTradeItem && document.getElementById('trade-modal').classList.contains('show')) updateModalLivePrice();
     }, 1500);
 
-    function getLivePrice(itemName, baseP) { let mItem = marketByName.get(itemName); return mItem ? baseP * mItem.multiplier : baseP; }
-
     // ==========================================
-    // UI RENDERING & I18N APPLICATION
+    // UI RENDERING 
     // ==========================================
     function switchTab(tabId) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
@@ -725,8 +714,7 @@
     function updateHeaderBalance() { const balEl = document.getElementById('header-balance'); updatePriceWithFX(balEl, player.balance); checkRecordsBalance(); checkQuestsSilent(); }
 
     function renderHome() {
-        const container = document.getElementById('case-container'); 
-        let htmlParts = [];
+        const container = document.getElementById('case-container'); let htmlParts = [];
         casesDB.forEach(c => {
             let totalWeight = c.pool.reduce((s, p) => s + p.w, 0); let barHtml = ''; let maxTier = 1;
             [...c.pool].sort((a,b) => a.t - b.t).forEach(p => { 
@@ -745,8 +733,7 @@
         let totalWeight = c.pool.reduce((s, p) => s + p.w, 0); let sortedPool = [...c.pool].sort((a,b) => b.w - a.w);
         let htmlParts = [];
         sortedPool.forEach(item => { let percent = (item.w / totalWeight * 100).toFixed(2); htmlParts.push(`<div class="rate-item"><span style="color: ${item.c}">${item.n}</span><span class="num-font">${percent}%</span></div>`); });
-        list.innerHTML = htmlParts.join('');
-        document.getElementById('rates-modal').style.display = 'flex';
+        list.innerHTML = htmlParts.join(''); document.getElementById('rates-modal').style.display = 'flex';
     }
     function closeRatesModal() { document.getElementById('rates-modal').style.display = 'none'; }
 
@@ -799,6 +786,7 @@
         let hasEpic = pulledResults.some(item => item.t >= 4); if(hasEpic) playEpic(); else playStop();
 
         let totalLiveVal = 0; let highestTier = 1; let totalXP = 0; const xpMap = {1:5, 2:15, 3:40, 4:120, 5:400};
+        
         pulledResults.forEach(item => {
             player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.p, t: item.t });
             let liveVal = getLivePrice(item.n, item.p); totalLiveVal += liveVal; addHistory(c.name, item.n, item.c, liveVal);
@@ -816,10 +804,11 @@
         if (amount === 1) {
             let item = pulledResults[0]; title.innerHTML = `${t('gacha_got')}<br><span style="font-size: 32px">${item.n}</span>`; title.style.color = item.c; title.style.textShadow = `0 0 15px ${item.c}`;
         } else {
-            document.getElementById('gacha-roller').style.display = 'none'; const grid = document.getElementById('x10-result-grid'); grid.style.display = 'grid';
+            document.getElementById('gacha-roller').style.display = 'none'; const grid = document.getElementById('x10-result-grid'); grid.style.display = 'grid'; 
             let x10Parts = [];
             pulledResults.forEach(item => { x10Parts.push(`<div class="x10-item" style="color: ${item.c}; border-color: ${item.c}; background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, ${hexToRgba(item.c, 0.25)} 100%);">${item.n}</div>`); });
             grid.innerHTML = x10Parts.join('');
+
             title.innerHTML = `${t('gacha_got_10')}<br><span class="num-font" style="font-size: 20px; color: ${cUP}">${t('gacha_total')} ${totalLiveVal.toFixed(2)}$</span>`; title.style.color = "white"; title.style.textShadow = "none";
         }
         currentGachaSession = null;
@@ -863,8 +852,7 @@
             const livePrice = getLivePrice(item.n, item.baseP);
             htmlParts.push(`<div class="item-card" style="background: linear-gradient(180deg, rgba(20,22,30,0.6) 0%, ${hexToRgba(item.c, 0.1)} 100%); box-shadow: 0 4px 15px ${hexToRgba(item.c, 0.05)}, inset 0 2px 0 ${item.c};"><div class="item-name" style="color: ${item.c}">${item.n}</div><div class="item-price num-font" id="bp-p-${item.id}">${livePrice.toFixed(2)}$</div><button class="pixel-btn" style="margin-top:8px; padding: 6px; font-size:13px; background: rgba(0,0,0,0.4);" onclick="sellBackpackItem(${item.id})">${t('btn_sell')}</button></div>`);
         });
-        container.innerHTML = htmlParts.join('');
-        updateBackpackPrices(); 
+        container.innerHTML = htmlParts.join(''); updateBackpackPrices(); 
     }
 
     function updateBackpackPrices() {
@@ -877,8 +865,9 @@
         const idx = player.inventory.findIndex(i => i.id === id);
         if (idx > -1) { 
             const livePrice = getLivePrice(player.inventory[idx].n, player.inventory[idx].baseP); 
-            player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; 
-            player.inventory.splice(idx, 1); addXP(2); checkAchievements(); saveGame(); renderBackpack(); showToast(`${t('t_sell')} +${livePrice.toFixed(2)}$`, cUP); checkQuestsSilent();
+            player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; player.inventory.splice(idx, 1); 
+            addXP(2); checkAchievements(); saveGame(); 
+            renderBackpack(); showToast(`${t('t_sell')} <br>${player.inventory[idx]?.n || "Item"}`, cUP); checkQuestsSilent(); 
         }
     }
 
@@ -892,8 +881,9 @@
     function confirmSell() {
         let totalEarned = 0; let itemsSold = 0;
         player.inventory = player.inventory.filter(item => { if(pendingSellIds.includes(item.id)) { totalEarned += getLivePrice(item.n, item.baseP); itemsSold++; return false; } return true; });
-        player.balance += totalEarned; player.stats.sell += itemsSold; player.dailyStats.sell += itemsSold; addXP(itemsSold * 2); checkAchievements();
-        saveGame(); document.getElementById('sell-confirm-modal').style.display = 'none'; renderBackpack(); showToast(`${t('t_sell_all')} +${totalEarned.toFixed(2)}$`, cUP); checkQuestsSilent();
+        player.balance += totalEarned; player.stats.sell += itemsSold; player.dailyStats.sell += itemsSold; 
+        addXP(itemsSold * 2); checkAchievements(); saveGame(); 
+        document.getElementById('sell-confirm-modal').style.display = 'none'; renderBackpack(); showToast(`${t('t_sell_all')} +${totalEarned.toFixed(2)}$`, cUP); checkQuestsSilent(); 
     }
     function closeSellModal() { document.getElementById('sell-confirm-modal').style.display = 'none'; }
 
@@ -925,9 +915,11 @@
         });
         dailyContainer.innerHTML = dailyParts.join(''); onceContainer.innerHTML = onceParts.join('');
     }
+
     function claimQuest(qid, reward) { 
         if (!player.questClaimed.includes(qid)) { 
-            player.questClaimed.push(qid); player.balance += reward; addXP(Math.floor(reward * 0.3)); playClaim(); checkAchievements(); saveGame(); renderQuests(); showToast(`${t('t_claim')} +${reward}$`, cUP); 
+            player.questClaimed.push(qid); player.balance += reward; addXP(Math.floor(reward * 0.3)); checkAchievements(); saveGame(); 
+            renderQuests(); showToast(`${t('t_claim')} +${reward}$`, cUP); playClaim(); 
         } 
     }
 
@@ -937,8 +929,7 @@
         document.getElementById('rec-balance').innerText = player.records.maxBalance.toFixed(2) + '$'; document.getElementById('rec-inv').innerText = player.records.maxInvValue.toFixed(2) + '$';
         document.getElementById('rec-item-val').innerText = player.records.bestItemValue.toFixed(2) + '$'; document.getElementById('rec-item-name').innerText = player.records.bestItemName || t('none');
         
-        const grid = document.getElementById('achievements-grid'); 
-        let htmlParts = [];
+        const grid = document.getElementById('achievements-grid'); let htmlParts = [];
         achievementsDB.forEach(a => {
             let isUnlocked = player.achievementsUnlocked.includes(a.id); let prog = Math.min(getAchievementProgress(a.cond), a.target);
             let classLocked = isUnlocked ? "" : "achieve-locked"; let progText = isUnlocked ? t('a_unlocked') : `${Math.floor(prog)}/${a.target}`;
@@ -975,7 +966,8 @@
     function buyMarketItem(item) {
         const livePrice = item.baseP * item.multiplier;
         if(player.balance >= livePrice) { 
-            player.balance -= livePrice; player.stats.buy++; player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP, t: item.t }); addXP(2); checkAchievements(); saveGame(); showToast(`${t('t_buy')} <br>${item.n}`, cUP); checkQuestsSilent(); 
+            player.balance -= livePrice; player.stats.buy++; player.inventory.unshift({ id: Date.now() + Math.random(), n: item.n, c: item.c, baseP: item.baseP, t: item.t }); 
+            addXP(2); checkAchievements(); saveGame(); showToast(`${t('t_buy')} <br>${item.n}`, cUP); checkQuestsSilent(); 
         } else { showToast(t('err_money'), cDOWN); }
     }
 
@@ -983,7 +975,8 @@
         const idx = player.inventory.findIndex(i => i.n === item.n);
         if(idx > -1) { 
             const livePrice = getLivePrice(player.inventory[idx].n, player.inventory[idx].baseP); 
-            player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; player.inventory.splice(idx, 1); addXP(2); checkAchievements(); saveGame(); showToast(`${t('t_sell')} <br>${item.n}`, cUP); checkQuestsSilent();
+            player.balance += livePrice; player.stats.sell++; player.dailyStats.sell++; player.inventory.splice(idx, 1); 
+            addXP(2); checkAchievements(); saveGame(); showToast(`${t('t_sell')} <br>${item.n}`, cUP); checkQuestsSilent(); 
         } else { showToast(t('err_no_item'), cDOWN); }
     }
 
